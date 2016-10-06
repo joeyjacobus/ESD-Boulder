@@ -29,17 +29,26 @@ BEGIN
 	SETB P3.7
 
 	* Configure Serial port
-	MOV SCON,#40H	Mode 1, 8 bit uart with timer 1 baud generator	
+	MOV SCON,#50H	Mode 1, 8 bit uart with timer 1 baud generator, Receive enable
 
 	MOV R1,#056H	puts 'ascii value for U' in R1
-	CLR SCON.1		Make sure clear to start
-	MOV SBUF,R1
-MAINLOOP
-	JNB SCON.1,SKIP		Check if TI is set, if not don't transmit
-	MOV SBUF,R1
-	CLR SCON.1	Clear TI bit 
+	
+	CLR SCON.1		Make sure TI clear to start
+	CLR SCON.0 		MAke sure RI clear to start
+	* MOV SBUF,R1
 
-SKIP
-	AJMP MAINLOOP
+GET
+	CLR SCON.0 			Clear RI bit
+	JNB SCON.0,GET		Wait for receive
+	MOV A,SBUF			Move received byte to Accumulator
+	
+	* START transmitting
+	CLR SCON.1			Clear TI bit 
+
+	MOV SBUF,A 			Write the byte back
+TX	
+	JNB SCON.1,TX		Check if TI is set, if not don't transmit
+	AJMP GET
+
 
 	

@@ -31,17 +31,26 @@ DUNFIELD 8051 ASSEMBLER: LAB3TST                                      PAGE: 1
 0014  D2 B7                 29  	SETB P3.7
 0016                        30  
 0016                        31  	* Configure Serial port
-0016  75 98 40              32  	MOV SCON,#40H	Mode 1, 8 bit uart with timer 1 baud generator	
+0016  75 98 50              32  	MOV SCON,#50H	Mode 1, 8 bit uart with timer 1 baud generator, Receive enable
 0019                        33  
 0019  79 56                 34  	MOV R1,#056H	puts 'ascii value for U' in R1
-001B  C2 99                 35  	CLR SCON.1		Make sure clear to start
-001D  89 99                 36  	MOV SBUF,R1
-001F                        37  MAINLOOP
-001F  30 99 04              38  	JNB SCON.1,SKIP		Check if TI is set, if not don't transmit
-0022  89 99                 39  	MOV SBUF,R1
-0024  C2 99                 40  	CLR SCON.1	Clear TI bit 
-0026                        41  
-0026                        42  SKIP
-0026  01 1F                 43  	AJMP MAINLOOP
-0028                        44  
-0028                        45  	
+001B                        35  	
+001B  C2 99                 36  	CLR SCON.1		Make sure TI clear to start
+001D  C2 98                 37  	CLR SCON.0 		MAke sure RI clear to start
+001F                        38  	* MOV SBUF,R1
+001F                        39  
+001F                        40  GET
+001F  C2 98                 41  	CLR SCON.0 			Clear RI bit
+0021  30 98 FB              42  	JNB SCON.0,GET		Wait for receive
+0024  E5 99                 43  	MOV A,SBUF			Move received byte to Accumulator
+0026                        44  	
+0026                        45  	* START transmitting
+0026  C2 99                 46  	CLR SCON.1			Clear TI bit 
+0028                        47  
+0028  F5 99                 48  	MOV SBUF,A 			Write the byte back
+002A                        49  TX	
+002A  30 99 FD              50  	JNB SCON.1,TX		Check if TI is set, if not don't transmit
+002D  01 1F                 51  	AJMP GET
+002F                        52  
+002F                        53  
+002F                        54  	
