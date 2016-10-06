@@ -1,0 +1,13 @@
+DUNFIELD 8051 ASSEMBLER: TEST1                                        PAGE: 1
+
+0000                         1  *
+0000                         2  * EMILY test program: Step through & increment local memory
+0000                         3  *
+0800                         4  	ORG	$0800
+0800  78 00                  5  BEGIN	MOV	R0,#0		Begin at bottom of internal RAM
+0802  E4                     6  	CLR	A		Zero initial value
+0803  F6                     7  LOOP1	MOV	[R0],A		Write to internal RAM
+0804  04                     8  	INC	A		Advance value
+0805  08                     9  	INC	R0		Advance register
+0806  80 FB                 10  	SJMP	LOOP1		And continue
+0808                        11  *DEMO installed August 24, 2016 (Not to be used after 30 days).

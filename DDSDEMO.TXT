@@ -1,0 +1,17 @@
+This is a demonstration version of a commercial product, and it
+is licensed for a limited term product evaluation only.
+
+ Some source files may have been excluded from this distribution.
+ Some executable programs may be excluded or have limited functionality.
+
+For more information, please contact:
+
+   Dunfield Development Systems
+   115 Manion Heights Cres.
+   RR#2 Carp, Ontario Canada
+   K0A 1L0
+
+   http://www.dunfield.com
+   Fax: 613-256-5821
+
+S/N: DEMO installed August 24, 2016 (Not to be used after 30 days).

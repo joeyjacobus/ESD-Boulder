@@ -1,0 +1,143 @@
+================================================================
+EEEEEEE   MM   MM    SSSSS   EEEEEEE  TTTTTTT  U     U   PPPPPP
+E         M M M M   S     S  E           T     U     U   P     P
+E         M  M  M   S        E           T     U     U   P     P
+EEEE      M     M    SSSSS   EEEEE       T     U     U   PPPPPP
+E         M     M         S  E           T     U     U   P
+E         M     M   S     S  E           T     U     U   P
+EEEEEEE   M     M    SSSSS   EEEEEEE     T      UUUUU    P
+================================================================
+
+A program for configuring EMILY and MONICA :
+
+EMSETUP is a program which configures the EMILY and/or  MONICA  programs
+to set the initial values of several features which are loaded when  the
+program is run.
+
+The EMSETUP command accepts the name of  the  file  to  configure  as  a
+command line argument. If no extension is given, EMSETUP assumed ".COM".
+For example,  to edit the settings contained in EMILY52.COM,  you  could
+use the command:
+
+                         EMSETUP EMILY52.COM
+                                  or
+                           EMSETUP EMILY52
+
+If additional filenames are given,  EMSETUP will write the new  settings
+to those files (as well as the original one).  This behavior can be used
+to copy settings from one file to another:
+
+                       EMSETUP EMILY52 MONICA52
+
+The above command reads the default settings  from  EMILY52.COM,  allows
+you to edit them,  and  writes  the  new  settings  to  EMILY52.COM  and
+MONICA52.COM.  If you do not make any changes before exiting and  saving
+the settings,  the effect is to copy the settings  from  EMILY52.COM  to
+MONICA52.COM.
+
+Once you have started EMSETUP,  you will be presented  with  a  menu  of
+configuration options which can be configured:
+
+                       Screen colors
+                       Special function registers
+                       Serial I/O defaults
+                       Target interface speed
+                       Serial port assignments
+                       Animate/Breakpoint delays
+                       RESET logic level
+                       Default load filename
+                       Exit EMSETUP
+Screen colors:
+
+   This option permits you to change the  colors  used  in  the  various
+   windows presented by EMILY and MONICA.  NOTE:  Only the color screens
+   can be altered.  When the  '/Monochrome'  switch is used,  EMILY  and
+   MONICA always use a black and white presentation.
+
+   Once you select this option,  you will be  presented  with  a  sample
+   window which is displayed in the colors of the  "Disassembly"  window
+   in EMILY and MONICA. Press:
+
+        PgUp/PgDn   - To switch to the other windows
+        Up/Down     - To change the foreground color
+        Left/Right  - To change the background color
+        Escape      - To return to the main EMSETUP menu
+
+Special function registers:
+
+   This  option  allows  you  to  Add/Modify/Delete   special   function
+   registers which appear in the EMILY/MONICA 'F'  menu and disassembler
+   output.
+
+   The currently defined special function registers will  be  displayed,
+   along with each ones address.  To  change/delete/insert  a  register,
+   press the letter beside the one you wish to alter.  If  more  than  1
+   column of registers are defined,  use the  SPACE  BAR  to  shift  the
+   selection menu between each row of register definitions.
+
+   Once you have selected a register,  you will be presented with a menu
+   of options:
+
+        Change address      - Modify the Direct Address of the SFR
+        Delete entry        - Delete the SFR definition
+        Insert before       - Insert a new definition before this one
+        Insert after        - Insert a new definition after this one
+
+   NOTE: if you add SFR's to MONICA,  or to EMILY when you are using the
+   '/Hardware'  option,  you  must  also  add   code   to   the   kernal
+   (KERNL52.ASM) to allow them to be read and written. The kernal uses a
+   "jump"  table of direct addresses  (called 'CTAB1'  and  'CTAB2')  to
+   invoke handlers which read and write those addresses in  response  to
+   commands from the PC.  Look at the code for other SFR's  ('TL0' etc.)
+   to see how to add your own handlers.
+
+   When you run EMILY or MONICA with additional SFR's defined,  use  the
+   SPACE BAR to move the selection menu between each row of SFR's.
+
+Serial I/O defaults:
+
+   This option presents you with a serial I/O setup screen which  mimics
+   the ones in EMILY and MONICA.  Select the values that you wish to  be
+   in effect when EMILY and/or MONICA is loaded.
+Target interface speed:
+
+   This option sets the serial I/O speed  (baudrate)  that  is  used  by
+   MONICA and EMILY  (when  '/h'  is used)  to interface to  the  target
+   system kernal.  You should not change this  value,  unless  you  have
+   modified KERNL52.ASM,  or are using a target crystal frequency  which
+   is  not  11.059  Mhz.  The  KERNL52.ASM  file  contains  a   detailed
+   discussion  on  interface  speeds  available   at   various   crystal
+   frequencies.  Use the UP/DOWN arrows to change the  interface  speed,
+   ESCAPE to exit.
+
+Serial port assignments:
+
+   This option allows you to select the PC serial ports  which  will  be
+   used for the Serial I/O redirection and Target  interface  functions.
+   Use the 'S' and 'T'  keys to cycle each option from COM1-COM4.  Press
+   ESCAPE to exit.  NOTE:  You cannot define both functions as the  same
+   serial port.
+
+Animate/Breakpoint delays:
+
+   This options allows  you  to  change  the  default  delay  value  (in
+   milliseconds)  of  the  animation  single-step  function,   and   the
+   breakpoint delay timer. NOTE that due to a PC clock limitation, these
+   delays are limited to a resolution of 1/18 second (about 55 ms).
+
+RESET logic level:
+
+   This option allows you to set the logic  level  of  the  RTS  "reset"
+   control line from the PC. You may select RESET when RTS is "asserted"
+   (+12v)  or "deasserted" (-12v).  If you are using an older version of
+   our "BD52"  single board computer,  you may have to set this value to
+   "asserted".
+
+Default load filename
+
+   This option allows you to select the default filename  and  extension
+   that will appear in the input area in response to a  'L'oad  command.
+   Enter the name you wish, and press ENTER or ESCAPE to exit.
+
+   NOTE: EMSETUP should NOT be used on the DEMO version of EMILY.
+S/N: DEMO installed August 24, 2016 (Not to be used after 30 days).

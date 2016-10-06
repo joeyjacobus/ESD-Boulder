@@ -1,0 +1,1098 @@
+
+
+
+
+
+
+
+
+
+
+
+
+       ==================================================================
+       EEEEEEE  MM   MM  IIIIIII  L       Y     Y        5555555   22222
+       E        M M M M     I     L        Y   Y         5        2     2
+       E        M  M  M     I     L         Y Y          555555         2
+       EEEE     M     M     I     L          Y     ---         5   22222
+       E        M     M     I     L          Y                 5  2
+       E        M     M     I     L          Y           5     5  2
+       EEEEEEE  M     M  IIIIIII  LLLLLLL    Y            55555   2222222
+       ==================================================================
+
+
+
+
+
+                                       A
+                               Simulator/Emulator
+                                    for the
+                                 8051 and 8052
+
+
+
+
+
+                                  Release 1.7
+
+                               Revised 07-Apr-00
+
+
+
+
+
+
+
+
+
+
+                          Dunfield Development Systems
+                          ----------------------------
+                             High quality tools for
+                              Embedded Development
+                                 at low prices.
+
+                            http://www.dunfield.com
+
+
+                       Copyright 1991-2005 Dave Dunfield
+                              All rights reserved
+
+
+
+                          EMILY: An 8051/52 simulator
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+        1.1 System Requirements                                             1
+
+     2. STARTING EMILY                                                      2
+
+
+     3. USING EMILY                                                         4
+
+        3.1 The Main Control Panel                                          4
+        3.2 The Memory Editor                                              11
+        3.3 Hardware Emulation                                             13
+        3.4 IO/Memory redirection                                          14
+        3.5 SFR emulation                                                  15
+        3.6 Messages                                                       19
+    EMILY: An 8051/52 simulator                                      Page: 1
+
+
+    1. INTRODUCTION
+
+          EMILY  is  a  software  simulator  for  the  8051/52   family   of
+       processors.  It provides a powerful debugging  environment,  offering
+       many features:
+
+       - Supports full 64K of PROGRAM and  64K  of  DATA  memory.  DATA  and
+         PROGRAM memory may also be  overlaid  into  a  single  64K  address
+         space.
+
+       - Hardware emulation mode communicates with the  target  system,  and
+         allows you to include the physical I/O lines,  timers etc.  in your
+         simulation.
+
+       - Supports user supplied SFR emulation code.
+
+       - Single step, Multi Step, Animate and Full Speed execution modes.
+
+       - Simultaneous on-screen displays of  program  disassembly,  internal
+         memory, CPU registers and simulation messages.
+
+       - Full screen editors for CPU registers,  Special Function  Registers
+         (SFR's), and each of the INTERNAL, EXTERNAL DATA and PROGRAM memory
+         spaces.  All of the above may be viewed/altered at any time  during
+         the debugging session.
+
+       - Multiple breakpoints are transparent to the user program.
+
+       - Supports the additional SFR's and internal RAM of the 8052 series.
+
+       1.1 System Requirements
+
+             EMILY will run on any IBM PC/AT/PS2 compatible  system  with  a
+          MDA/CGA/EGA or VGA display,  two COM ports,  and at least 256K  of
+          free system RAM.
+
+          - If hardware emulation or serial I/O are not used,  only one  COM
+            port is required.  If neither feature is used then no COM  ports
+            are required.
+
+          - If overlaid data/program memory  is  used,  ram  requirement  is
+            reduced by 64k.  If  SFR  emulation  code  is  not  loaded,  ram
+            requirement is reduced by 64k.
+
+          - Some CGA displays may exibit "snow" or flicker during high speed
+            screen updates.  This effect will not occur with MDA, EGA or VGA
+            displays.
+    EMILY: An 8051/52 simulator                                      Page: 2
+
+
+    2. STARTING EMILY
+
+          If you are using the optional hardware emulation mode, insure that
+       the resident control software (supplied)  is inserted into the target
+       system,  and that the PC running EMILY is  connected  to  the  target
+       systems serial port  via  COM2.  Power  on  the  test  system  before
+       starting EMILY.  The resident control software must  be  active  when
+       EMILY "looks" for it.
+
+          EMILY is invoked by typing her name at the DOS command  line.  You
+       will be greeted with a "welcome"  screen which displays a reminder of
+       the command line syntax and the copyright message.  This screen  will
+       remain on the display for about 5 seconds  (10 seconds  in  the  demo
+       version).  Pressing any key while this screen is visible will  bypass
+       this delay, and proceed directly to the main control panel.
+
+          If EMILY is given a file name on the command line, she loads it in
+       the same manner as if the  'L'oad command had been used  from  within
+       the main control panel.
+    EMILY: An 8051/52 simulator                                      Page: 3
+
+
+          EMILY also accepts several option switches on the command line:
+
+            /Io[:low-high]- Enables memory mapped I/O redirection.   Causes
+                            EMILY to redirect external DATA memory accesses
+                            in this range to the target system.  Default is
+                            the entire memory map (0000-FFFF).
+
+            /Hardware[:n] - Enables the hardware emulation feature to cause
+                            EMILY to interact with the target  system  when
+                            performing I/O accesses.  This  option  may  be
+                            followed by a  ':'  and  a  numeric value which
+                            defines the BAUD RATE to be used to communicate
+                            with the target system. Default is 28800.
+
+            /Mono *       - Inhibits the  color display, even  if  a  color
+                            adapter is present. This option may  be  useful
+                            if your monitor/adapter combination provides an
+                            unpleasant or unusable display for EMILY.
+
+            /Overlay      - Joins EXTERNAL DATA  and PROGRAM  memory into a
+                            single 64K address space which can be  accessed
+                            with either MOVX or MOVC. This is equivalent to
+                            a hardware implementation in which the PSEN and
+                            RD signals are ANDed together.
+
+            /Reset        - Causes EMILY to deassert the RTS line when she
+                            initializes the serial port.
+
+            /Swapcom      - Exchanges the operation of the two serial ports
+                            on the PC.  When this option is used, COM1 will
+                            be used to communicate with the  target system,
+                            and COM2 is used for serial I/O redirection.
+                            Note: the EMSETUP program can be used establish
+                            alternate COM ports including COM3 and/or COM4.
+
+            S=filename    - Loads user supplied SFR emulation code.
+
+        * Note: If some of the EMILY windows appear  to  be  an  unreadable
+                washed-out yellow color, try adjusting the color contrast on
+                your monitor. Those windows should be an easy to read brown.
+
+          If you are using the  '/Hardware'  option,  and EMILY is unable to
+       establish communication with the target system, you will see an error
+       message flashing on the screen.  EMILY will keep trying, allowing you
+       to debug the connection. You may also press the ESCAPE key to disable
+       hardware emulation, and proceed with a software only simulation.
+
+          If you are using the S= option to load  SFR  emulation  code,  and
+       EMILY hangs just after displaying the main control panel screens,  or
+       during accesses to SFR's,  the most likely cause is a problem in your
+       SFR emulation code.
+    EMILY: An 8051/52 simulator                                      Page: 4
+
+
+    3. USING EMILY
+
+       3.1 The Main Control Panel
+
+             Once EMILY is up and running,  you will be presented  with  the
+          "Main Control Panel", which consists of four "windows" displaying:
+
+            - A disassembly of program memory       (Upper LEFT)
+            - The contents of CPU registers         (Upper CENTER)
+            - The contents of INTERNAL MEMORY       (Upper RIGHT)
+            - Informational messages from EMILY     (Lower portion)
+
+             All of EMILY'S functions are  accessed  by  command  characters
+          entered from this screen:
+
+          3.1.1 A - Animate execution
+
+                This function begins execution of the user program (from the
+             address in the PC register).  As each instruction is  executed,
+             EMILY will display the  instruction  being  executed,  the  CPU
+             registers,  and the contents of internal RAM in the appropriate
+             windows.
+
+                When you enter the  'A'  command,  EMILY will prompt you for
+             the number of instructions to animate. Pressing return (without
+             entering  a  number)  will  cause  the  animation  to   proceed
+             non-stop. Pressing <escape> will return you to the Main Control
+             Panel.
+
+             The animation will terminate when:
+
+                - The requested number of instructions have been stepped.
+                - A breakpoint is encountered.
+                - The illegal opcode ($A5) is encountered.
+                - The <escape> key is pressed on the PC console.
+
+          3.1.2 B - set Breakpoint
+
+                This command sets a breakpoint such that  program  execution
+             under the 'A'nimate,  or 'G'o,  commands will perform an action
+             when the breakpoint address is encountered.
+
+                Up to 10 breakpoints may be in effect at the same time.
+
+                You will be prompted for  the  address  (in  HEX).  Pressing
+             return (without entering an address)  will cause the breakpoint
+             to be  set  at  the  current  program  counter  (PC)  location.
+             Pressing <escape> will return you to the main control panel.
+
+                EMILY stores the breakpoint addresses internally in a simple
+             zero terminated list.  This allows her  to  avoid  searching  a
+             fixed size table,  and helps speed  up  the  operation  of  the
+             program,  especially when there are few breakpoints.  This does
+             however cause the restriction that you cannot set a  breakpoint
+             at address zero ($0000).
+    EMILY: An 8051/52 simulator                                      Page: 5
+
+
+                After accepting the address,  EMILY will prompt you  with  a
+             menu of flags which control the operation of the breakpoint:
+
+            (E)nable            NO/YES
+            (W)atchpoint        NO/YES
+            (K)eypress          NO/YES
+            (P)ause             NO/YES (delay)
+            (C)ounter           NO/Counter# (current value)
+            (D)ecrement/stop    NO/YES
+
+                The (E)nable flag allows the breakpoint to function. You can
+             clear this flag to temporarily  disable  a  breakpoint  without
+             removing it.
+
+                The  (W)atchpoint flag causes the breakpoint to  update  the
+             EMILY display screens without stopping. This allows you to view
+             the registers or memory  content  at  various  points  in  your
+             program.
+
+                The  (K)eypress flag causes the breakpoint to stop and  wait
+             for a key before proceeding. SPACE will cause the simulation to
+             proceed, and ESCAPE will halt the program.  (W)atchpoint may be
+             used to cause a display update before the key is requested.
+
+                The  (P)ause flag causes the breakpoint to delay the  number
+             of milliseconds specified in the breakpoint delay  timer.  This
+             is most useful with  (W)atchpoint to allow  time  to  view  the
+             displays before the program proceeds.
+
+                The  (C)ounter option allows you  to  select  one  of  three
+             "breakpoint  counters"  which  will  be  incremented  when  the
+             breakpoint is encountered.  The program will proceed after  the
+             counter is updated (Does not stop).
+
+                The  (D)ecrement/stop  option  is  only  available  when   a
+             (C)ounter is selected, and causes the counter to be decremented
+             instead of incremented.  The program will be  halted  when  the
+             counter reaches zero.  This allows you to use a  breakpoint  to
+             stop a loop etc.  after a certain number of iterations.  To  do
+             this enable this option,  and set the counter to the number  of
+             times that you want the breakpoint skipped.
+
+                The Breakpoint Counters and Delay timer can  be  viewed  and
+             changed with the F4 (Breakpoint Counter) function.
+
+                If none of the option  flags  are  set,  a  breakpoint  will
+             simply cause the program to halt.
+    EMILY: An 8051/52 simulator                                      Page: 6
+
+
+          3.1.3 C - Change register
+
+                You will be prompted for the CPU register to change. Enter a
+             character from the following list, ESCAPE to abort, or F1 for a
+             reminder:
+
+                A   - A accumulator
+                B   - B accumulator
+                D   - Data pointer (DPTR)
+                S   - Stack pointer
+                P   - Program counter
+                W   - processor status Word
+                0-7 - general register 0-7
+
+                After you have selected the register,  you will be  prompted
+             for the new contents (in HEX).
+
+          3.1.4 D - edit Data memory
+
+                This command allows you to edit EXTERNAL DATA  memory  using
+             EMILY's  built  in  memory  editor.  See  the  "Memory  Editor"
+             section.
+
+          3.1.5 F - display/edit special Function registers
+
+                The names and contents of all SFR's are displayed in a menu.
+             To change a register,  enter the character preceding  the  ':',
+             immediately to the left of its name.  You will be prompted  for
+             its new contents.
+
+                If multiple columns of SFR's are  defined,  use  <space>  to
+             select the column to edit.
+
+                When debugging  with  the  hardware  emulation  option,  the
+             values read/and written to the SFR's will  reflect  the  actual
+             state of the hardware lines etc.  on the target  system  board.
+             Pressing any key while in this menu will refresh  the  display,
+             and make visible any changes which have occurred on the  target
+             system I/O lines etc.
+
+                When debugging without the hardware emulator  option,  SFR's
+             are simply stored internally within EMILY's memory.
+
+          3.1.6 G - Go: execute program
+
+                This  function  begins  high-speed  execution  of  the  user
+             program (from the address in the PC register).
+
+                When you enter the  'G'  command,  EMILY will prompt you for
+             the number of instructions to execute. Pressing return (without
+             entering a number)  will cause the program to proceed non-stop.
+             Pressing <escape> will return you to the Main Control Panel.
+    EMILY: An 8051/52 simulator                                      Page: 7
+
+
+             Program execution will terminate when:
+
+                - The requested number of instructions have been executed.
+                - A breakpoint is encountered.
+                - The illegal opcode ($A5) is encountered.
+                - The <escape> key is pressed on the PC console. *
+
+             * NOTE: If you are using 'Local' serial I/O mode, ESCAPE offers
+             you a menu of execution I/O functions.  See the F3 command  for
+             more information.
+
+          3.1.7 I - edit Internal memory
+
+                This command  allows  you  to  edit  INTERNAL  memory  using
+             EMILY's  built  in  memory  editor.  See  the  "Memory  Editor"
+             section.
+
+          3.1.8 J - Jump to PC
+
+                This command repositions the disassembly display window  (if
+             necessary)  to display the instruction addressed by the current
+             CPU Program Counter (PC).
+
+          3.1.9 K - Kill all breakpoints
+
+                Removes ALL breakpoints after prompting for permission to do
+             so.
+
+          3.1.10 L - Load program image
+
+                Prompts for the name of a file,  and loads it  into  PROGRAM
+             memory.  The file must be  in  either  INTEL  or  MOTOROLA  hex
+             download format.
+
+          3.1.11 N - Next disassembly window
+
+                Advances the disassembler to display the  following  screen.
+             Subsequent  'N'  commands will proceed  to  disassemble  higher
+             memory addresses.
+
+          3.1.12 P - edit Program memory
+
+                This command allows you to edit PROGRAM memory using EMILY's
+             built in memory editor. See the "Memory Editor" section.
+
+          3.1.13 R - Remove a breakpoint
+
+                Prompts for the address,  and if a breakpoint is set at that
+             address,  it is removed.  Pressing return  (without entering an
+             address)  will remove the breakpoint  at  the  current  program
+             counter (PC) location.
+    EMILY: An 8051/52 simulator                                      Page: 8
+
+
+          3.1.14 T - Traceback viewer
+
+                In all execution modes,  EMILY keeps track of the last  4095
+             instructions executed.  By entering the traceback  viewer,  you
+             can examine this recording,  and determine program activity  up
+             to 4095 instructions preceding the one on which execution  last
+             stopped.
+
+                The following command keys are available in the viewer:
+
+                Up   - Backup the display 1 instruction.
+                Down - Advance the display 1 instruction.
+                PgUp - Backup the display 50 instructions.
+                PgDn - Advance the display 50 instructions.
+                Home - Position to the beginning of recording.
+                End  - Position to the end of recording.
+                F1   - Display a help summary.
+                F2   - Prompt for position & move.
+                F3   - Search backward (in time) for address. *
+                F4   - Search forward  (in time) for address. *
+                Esc  - Exit the Traceback viewer.
+
+              * If you press <return> without entering an address, the search
+                commands will look for the previous or next instance of the
+                instruction at your current position in the traceback buffer.
+
+                Only the instruction executed  is  saved  in  the  traceback
+             viewer, the contents of registers, RAM etc. are not recorded.
+
+                The instruction at position 0 in the traceback buffer is the
+             one to which the current  PC  points,  and  has  not  yet  been
+             executed.
+
+          3.1.15 U - scroll disassembler Up
+
+                Backs up the disassembler to display  the  previous  screen.
+             Subsequent  'U'  commands will  proceed  to  disassemble  lower
+             memory addresses.  NOTE:  The  'U'  command makes an attempt to
+             insure that the disassembled code is correct,  however there is
+             a possibility that in backing up,  the disassembler will  align
+             on an incorrect code boundary,  and not be able to  detect  the
+             condition.
+
+          3.1.16 V - Vector to interrupt
+
+                This function prompts you  with  a  menu  of  the  available
+             8051/52 interrupts.  Use the arrow keys to position the  cursor
+             bar to the interrupt you desire to simulate, and press ENTER to
+             select it. You may use ESCAPE to cancel the function and return
+             to the Main Control Panel.
+
+                EMILY will simulate a long call (LCALL) to the corresponding
+             interrupt vector address by saving the current Program  Counter
+             on the CPU stack,  and reloading it with the  vector.  Any  SFR
+             bits normally set when the particular interrupt occurs will  be
+             set at this time.
+    EMILY: An 8051/52 simulator                                      Page: 9
+
+
+          3.1.17 F1 - Help display
+
+                Pressing this key displays a summary of the  EMILY  commands
+             which are available from the Main Control Panel.
+
+          3.1.18 F2 - Set Disassembler Address
+
+                Prompts  for  an  address  (in  HEX),  and  repositions  the
+             disassembler window to display instructions beginning  at  that
+             address.
+
+          3.1.19 F3 - Setup Serial Port
+
+                Opens a window displaying the (B)audrate,  (P)arity,  (D)ata
+             bits and  (S)top bits which are currently  configured  for  the
+             PC's COM1 serial port.
+
+                Press B, P, D or S to cycle to the next corresponding entry.
+
+                When Baudrate is selected as  'Local',  EMILY will  redirect
+             the  programs  serial  accesses  to  the  message  window.  Any
+             characters which are written to SBUF  will  be  output  in  the
+             message window,  and any  character  which  are  typed  at  the
+             keyboard will appear as incomming serial data.  When this  mode
+             is active, Pressing ESCAPE in the 'G'o command brings up a menu
+             of execution options:
+
+                End simulation  - Stops the 'G'o command.
+                Send ESCAPE     - Send ESCAPE through as a character.
+                Zoom window     - Switch to full screen I/O window.
+
+                If  'Local'  is not selected,  EMILY redirects the  programs
+             serial accesses to the PC's  COM1  serial  port,  however,  for
+             maximum  flexibility,  the  actual  data  format  used  may  be
+             configured by this menu.
+
+                EMILY allows you to  "fine tune"  a baud rate,  by using the
+             Up/Down keys.  Note that the available  baud  rate  values  are
+             determined by the PC  COM  port  hardware,  and  may  not  fall
+             exactly on the value you wish to use.
+
+                Asynchronous communication is specified to work properly  as
+             long as the device is operating within 5% of the intended  baud
+             rate.
+
+                For example:
+
+                        Desired baud rate       : 1500
+                        Allowable range (+/- 5%): 1425-1575
+                        Closest PC baud rate    : 1496
+
+                In the above example,  the baud rate produced is within 0.3%
+             of  the  desired  value,   and   is   therefore   well   within
+             specifications.
+    EMILY: An 8051/52 simulator                                      Page: 10
+
+
+          3.1.20 F4 - Breakpoint Counters
+
+                This  function  presents  the  current  breakpoint   counter
+             values, as well as the delay timer. You can edit this list with
+             the cursor keys. Use PgUp to clear the entire field, or PgDn to
+             clear  to  the  end  of  the  field.  A  blank  field  will  be
+             interpreted as ZERO.
+
+          3.1.21 F5 - Reset processor
+
+                This function performs a "reset" of the simulated processor.
+             All registers and SFR's are cleared to  their  default  values.
+             For convenience in debugging code not origined at zero,  the PC
+             register is loaded with the  base  address  of  the  last  file
+             loaded.
+
+          3.1.22 F10 - Shell to DOS
+
+                Activating this function suspends the simulator,  clears the
+             screen,  and invokes the operating system prompt.  Entering the
+             'EXIT' command returns to the simulation.
+
+          3.1.23 <space> - Single step one instruction
+
+                Every time you press the <space> bar, EMILY will execute one
+             instruction, and update the on-screen displays.
+
+          3.1.24 PgDn - Advance IRAM display page
+
+                Pressing this  key  advances  the  internal  memory  display
+             window by one page (64 bytes).
+
+          3.1.25 PgUp - Backup IRAM display page
+
+                Pressing this key  backs  up  the  internal  memory  display
+             window by one page (64 bytes).
+
+          3.1.26 Down - Advance IRAM display line
+
+                Pressing the  "down arrow"  key advances the internal memory
+             display window by one line (4 bytes).
+
+          3.1.27 Up - Backup IRAM display line
+
+                Pressing the  "up arrow"  key backs up the  internal  memory
+             display window by one line (4 bytes).
+    EMILY: An 8051/52 simulator                                      Page: 11
+
+
+       3.2 The Memory Editor
+
+             When you activate the 'D',  'I'  or 'P'  commands from the main
+          control panel,  EMILY will invoke its internal "Memory Editor"  to
+          access the desired memory area.  When you are within this  editor,
+          the following commands are available:
+
+          3.2.1 F1 - Help display
+
+                Pressing this key displays a summary of the  EMILY  commands
+             which are available from within the Memory Editor.
+
+          3.2.2 F2 - Set Edit Address
+
+                Prompts for an address (in HEX),  and repositions the editor
+             display and cursor to edit at that address.
+
+          3.2.3 F3 - Toggle Edit Mode
+
+                EMILY allows two edit modes,  HEX and  ASCII.  When  in  HEX
+             mode, your cursor will be positioned in the hexidecimal display
+             portion of the memory  memory  dump,  allowing  you  to  change
+             memory by entering a new value as two  hexidecimal  characters.
+             When in ASCII mode,  your cursor will be  positioned  over  the
+             ASCII portion of the dump,  and you  can  replace  memory  with
+             ASCII text typed at the keyboard.
+
+                Pressing F3 will toggle between HEX and ASCII mode,  causing
+             your cursor to switch between the corresponding portion of  the
+             memory display.
+
+          3.2.4 F4 - Block fill memory
+
+                This  function  prompts  with  "Starting  address",  "Ending
+             address",  and  "Fill  value".  Memory  between  the  specified
+             addresses will be set to the given value.
+
+                NOTE:  If you have used the  "/Io"  option to redirect  data
+             memory to the target, and attempt to block-fill a large section
+             in the redirected memory address range, this operation may take
+             quite some time,  since EMILY writes 5 bytes  over  the  serial
+             line for each memory byte filled.
+
+          3.2.5 Up - Move up 1 line
+
+                Pressing the UP ARROW causes the cursor to move  upwards  on
+             the screen by one line. This reduces the memory edit address by
+             16 bytes.
+
+          3.2.6 Down - Move down 1 line
+
+                Pressing the DOWN ARROW causes the cursor to  move  downward
+             on the screen by one  line.  This  increases  the  memory  edit
+             address by 16 bytes.
+    EMILY: An 8051/52 simulator                                      Page: 12
+
+
+          3.2.7 Left - Move left 1 byte
+
+                Pressing the LEFT ARROW causes the cursor  to  move  to  the
+             left by one byte position. This reduces the memory edit address
+             by 1 byte.
+
+                If the cursor is already at the left hand  margin,  it  will
+             wrap around to the rightmost position of the previous line.
+
+          3.2.8 Right - Move right 1 byte
+
+                Pressing the RIGHT ARROW causes the cursor to  move  to  the
+             right by one byte position.  This in increases the memory  edit
+             address by 1 byte.
+
+                If the cursor is already at the right hand margin,  it  will
+             wrap around to the leftmost position of the following line.
+
+          3.2.9 PgUp - Move back 1 page
+
+                Pressing the PGUP key causes the editor  to  move  back  one
+             display page.  This reduces the  memory  edit  address  by  256
+             bytes.
+
+          3.2.10 PgDn - Move forward 1 page
+
+                Pressing the PGDN causes the  editor  to  move  forward  one
+             display page.  This increases the memory edit  address  by  256
+             bytes.
+
+          3.2.11 Home - Move to start of line
+
+                Pressing the HOME key causes  the  cursor  to  move  to  the
+             leftmost position of the line it is currently on. If the cursor
+             was already in the  leftmost  position,  it  is  moved  to  the
+             leftmost position of the preceding line.
+
+          3.2.12 End - Move to end of line
+
+                Pressing the END key  causes  the  cursor  to  move  to  the
+             rightmost position of the line  it  is  currently  on.  If  the
+             cursor was already in the rightmost position,  it is  moved  to
+             the rightmost position of the following line.
+
+          3.2.13 Ctrl-PgUp - Move to start of memory
+
+                Pressing the CTRL  and  PGUP  keys  repositions  the  editor
+             display and cursor to address $0000 at the start of the  memory
+             block.
+
+          3.2.14 Ctrl-PgDn - Move to end of memory
+
+                Pressing the CTRL  and  PGDN  keys  repositions  the  editor
+             display and cursor to the  highest  address  available  in  the
+             memory block.
+    EMILY: An 8051/52 simulator                                      Page: 13
+
+
+       3.3 Hardware Emulation
+
+             EMILY supports a hardware emulation mode, which provides access
+          to most of the physical I/O ports,  timers etc.  from  the  target
+          system in your simulation.
+
+             The  target  system  must  be  running  the  supplied   control
+          software, which interacts with EMILY, and perform the I/O accesses
+          upon her commands.  The serial port of the target system  must  be
+          connected to the COM2 serial port of the PC.
+
+             There are a few restrictions which apply:
+
+             - The target system must provide access to the CPU serial port.
+
+             - There is an approximatly 0.7 MS delay when accessing the  I/O
+               ports and other physical hardware.  This occurs  due  to  the
+               serial activity required to communicate the data to and  from
+               the target system.  For  most  applications,  this  delay  is
+               acceptable,  particularly in the  stop/start  environment  of
+               simulation and debugging.  NOTE:  If you are using a baudrate
+               to communicate with the target system which is lower than the
+               default (28800), this delay will be longer.
+
+             - The control software uses TIMER1 internally to  generate  the
+               baud rate clock for its serial port.  This means that  TIMER1
+               is unavailable during the  simulation.  If  your  application
+               uses the serial port, we recommend you also use TIMER1 as the
+               baud rate generator.  Since EMILY has a separate  setup  menu
+               for serial port speed,  parity etc.  It will not affect  your
+               program that TIMER1 is disabled during the simulation. Simply
+               press F3 at EMILY's main control panel, and select the serial
+               parameters you desire.
+
+             When using this  (Hardware  Emulation)  feature,  the  Resident
+          Control Firmware should be running in  the  target  system  BEFORE
+          executing EMILY.  Be sure to specify '/H:<speed>' parameter on the
+          command line when starting EMILY.
+
+             The value of  <speed>  depends on the target systems  operating
+          frequency. A complete description of its calculation, as well as a
+          table of common values is located in the introductory comments  of
+          the KERNL52.ASM source file.
+    EMILY: An 8051/52 simulator                                      Page: 14
+
+
+       3.4 IO/Memory redirection
+
+             Some 8051 system designs include memory mapped hardware in  the
+          external data memory address space. It is possible to get EMILY to
+          see this hardware through the target system  (Hardware  emulation)
+          interface, with the '/I' command line option:
+
+            /I              - Redirect ALL external DATA memory addresses
+            /I:8000         - Redirect only addresses above $8000
+            /I:8000-8FFF    - Redirect only addresses $8000 to $8FFF
+
+             When this option is in effect,  EMILY  will  use  the  Hardware
+          Emulation interface to physically access the target system  memory
+          within the indicated range.  Please note the following when  using
+          the '/I' option:
+
+            - Only one IO/Memory redirection range is supported.
+
+            - Memory accesses within the  redirected  range  will be  slowed
+              significantly,  due to the serial communication required  with
+              the target system.
+
+            - Memory accesses outside of the redirected range will be slowed
+              slightly, due to the range check.
+
+            - Accesses to external CODE memory are NOT redirected,  EVEN  IF
+              THE '/Overlay' OPTION IS IN EFFECT!
+
+            - It is possible to have '/I' without  '/H',  to redirect memory
+              without the SFR's,  however in this case there is no provision
+              to specify the target interface baud rate on the command line.
+              (You can set it permanently with EMSETUP).
+
+            - The 'D'ata memory editor writes memory a byte at a time, which
+              makes block-fill's of redirected memory quite slow.  (This  is
+              rarely a problem since block-fill is not usually used with I/O
+              devices).
+    EMILY: An 8051/52 simulator                                      Page: 15
+
+
+       3.5 SFR emulation
+
+             EMILY does not internally emulate the  on-chip  peripherals  of
+          the 8051/52.  Normally these are handled by  using  the  /Hardware
+          interface option to access the real peripherals from  your  target
+          system in the simulation.
+
+             EMILY also supports the use of  loadable  SFR  emulation  code,
+          which allows you to write a program to handle SFR read  and  write
+          requests.  SFR emulation code is loaded with the S= option on  the
+          EMILY command line.
+
+             SFR  emulation  code  consists  of  a  binary  image  of   8086
+          executable code.  This image and it's data is given a  single  64K
+          memory block in which to execute (this is often referred to as the
+          TINY programming model).  EMILY automatically sets up the CS,  DS,
+          ES and SS registers to point to the  segment  where  the  code  is
+          loaded,  and initializes the stack pointer to the top of the block
+          before calling your program via a FAR CALL.
+
+             EMILY calls three entry points in the SFR emulation code,  each
+          entry point is invoked by a FAR CALL,  and must issue a FAR RETURN
+          (RETF) to properly return to EMILY. All processor registers may be
+          modified:
+
+          3.5.1 $0000 - Read SFR
+
+                This entry point is called to read an SFR.  The SFR  address
+             ($00-$FF)  is passed in AX.  To return a value  from  the  SFR,
+             place it in AL,  and  set  AH=0  before  returning.  If  AH  is
+             non-zero, EMILY assumes that the SFR is not implemented in your
+             code,  and handles it as it would if no SFR emulation code were
+             loaded.
+
+          3.5.2 $0005 - Write SFR
+
+                This entry point is called to  write  to  an  SFR.  The  SFR
+             address  ($00-$FF)  is passed in BX,  and the  value  to  write
+             ($00-$FF) is passed in AX. On return, set AH=0 to indicate that
+             the SFR has been successfully written. If AH is non-zero, EMILY
+             assumes that the SFR is  not  implemented  in  your  code,  and
+             handles it as it would if no SFR emulation code were loaded.
+
+                A useful "trick" that you can employ is to use this function
+             to test values written to SFR's without actually  handling  the
+             write.  You can examine the value being written,  and  use  the
+             OUTPUT and/or BREAK  functions  to  inform  the  user  when  an
+             unexpected value occurs,  however even though you processed the
+             value,  return non-zero AH so that EMILY will process it as  if
+             you had never been involved.
+    EMILY: An 8051/52 simulator                                      Page: 16
+
+
+          3.5.3 $000A - Initialize
+
+                This entry point is called once, when the SFR emulation code
+             is loaded.  It provides a means of initializing  your  code  if
+             required  (If not,  just insert a FAR RETURN at this location).
+             The  following  information  is  available  on  entry  to  this
+             function:
+
+                AX = EMILY segment
+                SI = Offset to INPUT function
+                DI = Offset to OUTPUT function
+                BX = Offset to BREAK function
+                DX = Offset to INTERNAL DATA table
+
+             Although the SFR emulation code runs in it's own  segment,  and
+          seems like a separate program,  it is in fact  considered  by  the
+          operating system to be only a subroutine of the EMILY program. You
+          should keep this in  mind  when  performing  any  system  services
+          (including those in Micro-C library functions).
+
+             - Requesting program termination (such as Micro-C's exit()  and
+          abort() functions) will terminate EMILY!
+
+             - Functions which modify the PSP,  DTA or any other  aspect  of
+          the host program will do so for EMILY!
+
+             SFR emulation code may be written directly in assembly language
+          using any  8086  assembler,  or  in  C  with  the  DDS  Micro-C/PC
+          compiler. Refer to the included code samples (SFRDEMO*.*).
+
+             Once loaded,  SFR emulation code becomes an  integral  part  of
+          EMILY.  Problems/bugs  in  the  emulation  code  may   result   in
+          unreliable operation of EMILY, or outright crashes! Write the code
+          carefully!
+    EMILY: An 8051/52 simulator                                      Page: 17
+
+
+             EMILY provides several "hooks"  to allow the SFR emulation code
+          to interact with the simulator.  To call a  function,  place  your
+          return address on the stack,  and perform a FAR JUMP to the  EMILY
+          SEGMENT and OFFSET that were passed to  the  INITIALIZE  function.
+          NOTE that only the OFFSET portion of your return address should be
+          stacked...  EMILY will automatically return to the  segment  where
+          the SFR emulation code was  originally  loaded.  Unless  otherwise
+          noted, it should be assumed that all registers except for CS,  DS,
+          SS, SP and BP will be modified by calls into EMILY.
+
+          3.5.4 BREAK
+
+                This function sets EMILY's  abort  flag,  so  that  it  will
+             perform processing similar to when the ESCAPE key  is  pressed.
+             Only the AX register is modified by this function.
+
+                Note that the execution of an instruction within EMILY  must
+             complete before ESCAPE processing occurs.  Since SFR  emulation
+             code is integral to the execution of the accessing instruction,
+             the ESCAPE processing  will  not  occur  until  AFTER  the  SFR
+             emulation code completes and returns control to EMILY.
+
+          3.5.5 INPUT
+
+                Reads a character from the PC keyboard,  and returns  it  in
+             AX. If the character is an ESCAPE character, EMILY's abort flag
+             is set,  causing ESCAPE  processing  to  occur  after  the  SFR
+             emulation code returns.  The ASCII code for the key pressed  is
+             returned in AX.
+
+                Calls to INPUT are honored only during program execution. If
+             this function is called from SFR emulation code which has  been
+             activated as a result of EMILY's  'F'  command  (SFR menu),  no
+             action is taken, and a value of 0 is returned.
+
+          3.5.6 OUTPUT
+
+                Writes the character in AL  to  EMILY's  debug  window.  The
+             special codes (BELL, RETURN, BACKSPACE, NEWLINE) will cause the
+             corresponding action only  if  AH=0,  otherwise  they  will  be
+             displayed using the PC character set.
+
+                Calls to OUTPUT are honored only during  program  execution.
+             If this function is called from SFR emulation  code  which  has
+             been activated as a result of EMILY's 'F'  command  (SFR menu),
+             no action is taken.
+    EMILY: An 8051/52 simulator                                      Page: 18
+
+
+          3.5.7 INTERNAL DATA
+
+                This is not a callable function,  but is instead  a  pointer
+             into an internal data table in which  EMILY  keeps  information
+             that may be of interest to the SFR emulation code.
+
+             3.5.7.1 DEBUG WINDOW DISABLE (byte at DX+0)
+
+                   This flag when set  non-zero  indicates  that  input  and
+                output to EMILY's debug window is disabled.  It will be  set
+                to zero for any  accesses  which  occur  as  the  result  of
+                simulating an 8051  instruction  (Go,  Animate,  Step),  and
+                non-zero  for  manual  accesses  (sFr  menu).  If  you  have
+                complicated user interactions in your code,  you may need to
+                check this flag in order to provide an  alternate  emulation
+                for manual accesses.
+
+                   If you must have user interaction during  manual  access,
+                use Micro-C's windowing functions  to  open  a  new  window,
+                perform your interaction, and close it before returning from
+                the SFR emulation code  (otherwise you will corrupt  EMILY's
+                screens).
+
+             3.5.7.2 HARDWARE EMULATION (byte at DX+1)
+
+                   This flag will be set non-zero when  EMILY  is  operating
+                with  the  /Hardware  option.  Since  SFR  emulation   takes
+                precedence over Hardware access,  you can check this flag to
+                decide to emulate an SFR in software-only mode,  or to  pass
+                it on to the hardware in Hardware emulation mode.
+
+             3.5.7.3 RUN/ABORT (byte at DX+2)
+
+                   This flag is  set  to  non-zero  when  EMILY  is  running
+                normally, and is set to zero if an abort (ESCAPE processing)
+                is pending. Note that you cannot reliably clear this flag to
+                cause escape processing to occur.  You must  use  the  BREAK
+                function to insure that EMILY will  check  the  flag  before
+                simulating the next instruction.  Note that in  most  cases,
+                you will not need to use this flag,  as  you  will  see  the
+                ESCAPE character returned from INPUT.  You  can  clear  this
+                flag to prevent escape processing from  occurring  after  an
+                ESCAPE code is returned from INPUT if you wish.
+    EMILY: An 8051/52 simulator                                      Page: 19
+
+
+       3.6 Messages
+
+             During the course of operation, EMILY may display the following
+          messages in the message window located in the lower portion of the
+          screen:
+
+          3.6.1 All Used!
+
+                You have tried to enter a  breakpoint,  when  all  available
+             breakpoints are in use.  EMILY allows up to 10 code breakpoints
+             to be active at any one time.
+
+          3.6.2 Animating at XXXX
+
+                Indicates that EMILY has  commenced  animated  execution  of
+             your program, beginning at the address 'XXXX'.
+
+          3.6.3 Already set!
+
+                Issued to indicate that the address at which you have  tried
+             to set a breakpoint is already active as a breakpoint.
+
+                This message will also  result  of  you  attempt  to  set  a
+             breakpoint at address zero ($0000).
+
+          3.6.4 Breakpoints: [XXXX ...]
+
+                This message shows the currently set  breakpoint  addresses,
+             and is issued whenever any  command  involving  breakpoints  is
+             performed.
+
+          3.6.5 Executing at XXXX
+
+                Indicates that EMILY has commenced full speed  execution  of
+             your program, beginning at the address 'XXXX'.
+
+          3.6.6 Code and data are overlaid
+
+                This message results from the use of the  '/Overlay'  switch
+             on the EMILY command line, and indicates that the external CODE
+             and DATA memory address  spaces  are  combined  into  a  single
+             overlaid 64K segment.
+
+          3.6.7 Code and data are separate
+
+                Indicate that EMILY  has  established  separate  64K  memory
+             address spaces for the code and data,  resulting in 128K  total
+             external memory.
+
+          3.6.8 FILENAME: Bad checksum
+
+                EMILY  has  encountered  a  record  containing  a  incorrect
+             checksum value while attempting to 'L'oad the named file.
+    EMILY: An 8051/52 simulator                                      Page: 20
+
+
+          3.6.9 FILENAME: Demo limit exceeded!
+
+                This message occurs only in the  "Demonstration"  version of
+             EMILY,  and indicates that you have attempted  to  'L'oad  more
+             than 500 bytes of code.  The demonstration release is  intended
+             only to allow you to  check  out  EMILY's  features,  you  must
+             purchase the  "production"  version if you intend  to  use  the
+             program for serious development and debugging.
+
+          3.6.10 FILENAME: Invalid HEX record
+
+                EMILY  has  encountered  an  improperly  formatted  download
+             record while attempting to 'L'oad the named file.
+
+          3.6.11 FILENAME: N bytes loaded
+
+                The  indicated  number  of  bytes  have  been   successfully
+             'L'oaded from the named file.
+
+          3.6.12 FILENAME: Unable to access
+
+                EMILY was unable to open and read the named file.
+
+          3.6.13 Hardware emulation is disabled
+
+                Indicates that the EMILY  is  running  as  a  software  only
+             simulator,  and will emulate special functions  registers  etc.
+             using internal RAM memory.
+
+          3.6.14 Hardware emulation is enabled
+
+                Issued if the  "/Hardware"  switch was  used  on  the  EMILY
+             command line,  and the Resident Control Software in the  target
+             system has been detected.  In this mode of  operation,  special
+             function register accesses  are  communicated  to  the  control
+             software, and result in physical activity on the target system.
+
+          3.6.15 Stopped at XXXX
+
+                Indicates that EMILY has stopped execution of you program at
+             the indicated address.  This message is appended to the initial
+             message indicating that execution had commenced.
+
+          3.6.16 Target system is not responding!!!
+
+                Indicates that the "/Hardware"  or  "/Io"  option switch was
+             used on the EMILY command  line,  but  EMILY  cannot  establish
+             communication with the target system.  EMILY will keep  trying,
+             allowing you to attempt to debug the connection.  You may  also
+             press the ESCAPE key,  to disable hardware emulation mode,  and
+             proceed with a software only simulation.
+    EMILY: An 8051/52 simulator                                      Page: 21
+
+
+          3.6.17 XXXX: Not found
+
+                This message is issued while in the  'T'raceback viewer,  to
+             indicate that an address 'XXXX'  you have searched for does not
+             occur between your current position,  and the start/end of  the
+             traceback buffer.
+S/N: DEMO installed August 24, 2016 (Not to be used after 30 days).

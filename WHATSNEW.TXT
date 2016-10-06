@@ -1,0 +1,53 @@
+New features in EMILY / MONICA release 1.7 :
+
+- Kernal "signature ID" increased to three bytes (from 1) to avoid
+  mis-interpreting application data as breakpoint.
+- Breakpoint/Single-Step will now "force" TI bit set (after a delay)
+  to avoid lockup when TI has been cleared with no character sent.
+
+New features in EMILY / MONICA release 1.6 :
+
+- /Io[:low-high] option for memory mapped I/O redirection
+
+New features in EMILY / MONICA release 1.5 :
+
+- Loadable SFR emulation code
+- Adjustable Animation delay
+
+New features in EMILY / MONICA release 1.4 :
+
+- 'U' command to scroll disassembler Up
+- F10 (Shell to DOS) function added to main menu
+- F4 (Block fill) added to memory editors
+- Refresh (space) changed to F5 in MONICA editors to permit use of
+  space in ASCII edit mode
+- Enhanced breakpoints! Breakpoints can now do:
+  - Enable -Breakpoint ON/OFF without removing them
+  - Watch  -Update screen displays and keep going
+  - Pause  -Wait specified # milliseconds & keep going
+  - Key    -Wait for key (SPACE=Proceed, ESC=Halt)
+  - Count  -Increment a counter & keep going
+  - Dec    -Decrement a counter and keep going if non-zero
+- F4 (Breakpoint counter) command added to main menu
+  (Monica52's F4 DS5000 option has been moved to F7)
+- F5 (Reset processor) added to EMILY and MONICA
+- Monica's 'Z' (Reset hardware) command moved to F6
+
+New features in EMILY / MONICA release 1.3 :
+
+- Serial I/O may now be redirected to a window (with ZOOM), or to a
+  PC COMM port in BOTH EMILY and MONICA. EMILY's F3 serial setup menu
+  has been added to MONICA, and has received a new 'Local' option which
+  selects I/O in the PC window.
+- Serial I/O "fine tuning" now shows only the actual speeds which are
+  supported by the PC COMM port hardware.
+- MONICA52 now supports single-chip in-circuit emulation with DS5000 type
+  processor. New '/DS5000' command line option, and F4 setup menu have
+  been added.
+- EMILY and MONICA now support user defined Special Function Registers,
+  for use with expanded 8051/52 variants.
+- New EMSETUP utility for configuring default setup values in EMILY and
+  MONICA, including screen colors, Special function registers, COMM port
+  assignment and configuration, reset mode, default filename etc.
+- New '/Reset' option to reverse sense of RTS controlled reset.
+S/N: DEMO installed August 24, 2016 (Not to be used after 30 days).

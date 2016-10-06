@@ -1,0 +1,79 @@
+DUNFIELD 8051 ASSEMBLER: LAB2                                         PAGE: 1
+
+0000                         1  *
+0000                         2  * EMILY Lab 2 Joey Jacobus
+0000                         3  * 
+0000                         4  * Uses Timer 0 configured to intterupt at 1.10 HZ (every 0..455seconds)
+0000                         5  * Toggles an LED on port 1.3 every execution of the intterupt handler
+0000                         6  * Also toggles port 1.4 on at the start of the ISR and off at the end of the ISR 
+0000                         7  
+0000                         8  	ORG	$0000
+0000  02 00 0E               9  	LJMP BEGIN
+0003                        10  
+000B                        11  	ORG $000B
+000B  02 00 38              12  	LJMP ISR_Timer0
+000E                        13  
+000E                        14  
+000E                        15  BEGIN
+000E                        16  	* Setup interrupts, gpio output, RD as secondary function
+000E                        17  	
+000E                        18  	* Configure P3.6 and P3.7 as secondary function /WR and /RD
+000E  C2 B6                 19  	CLR P3.6
+0010  D2 B6                 20  	SETB P3.6
+0012                        21  
+0012  C2 B7                 22  	CLR P3.7
+0014  D2 B7                 23  	SETB P3.7
+0016                        24  
+0016  75 8C 33              25  	MOV TH0,#033H	Load value for 1.10 Hz
+0019  75 8A 3D              26  	MOV TL0,#03DH 
+001C  75 89 01              27  	MOV TMOD,#01H     16 bit counter no reload
+001F                        28  
+001F  78 00                 29  	MOV R0,#0H		R0 counts the number of ISR - need to toggle led every 8 isrs
+0021  79 80                 30  	MOV R1,#080H 	A is the ISR latch counter
+0023  7A 00                 31  	MOV R2,#00H 	R2 is the main loop latch counter
+0025  90 0F FF              32  	MOV DPTR,#0FFFH	Use the DPTR to write to a 16 bit address
+0028  D2 A9                 33  	SETB IE.1 		ET0	Enable timer 0 interrupt
+002A  D2 AF                 34  	SETB IE.7 		EA Enable global interrupts
+002C  D2 8C                 35  	SETB TCON.4     TR0 start timer 0 
+002E                        36  
+002E                        37  MAINLOOP
+002E  09                    38  	INC R1
+002F  E9                    39  	MOV A,R1			Can only MOVX from accumulator
+0030  F0                    40  	MOVX [DPTR],A		Write debug value to latch
+0031  B9 FF FA              41  	CJNE R1,#0FFH,MAINLOOP	Check if R1==FF, set back to 0x80
+0034  79 80                 42  	MOV R1,#080H	
+0036  01 2E                 43  	AJMP MAINLOOP	
+0038                        44  
+0038                        45  
+0038                        46  
+0038                        47  * Timer 0 handler - toggle gpio
+0038                        48  * Executes approx every 0.056875 seconds - *8 = desired 0.455 second toggle rate
+0038                        49  ISR_TIMER0
+0038  D2 94                 50  	SETB P1.4 			Set debug  pin
+003A  0A                    51  	INC R2				Increment ISR counter
+003B  EA                    52  	MOV A,R2			Can only MOVX from accumulator
+003C  F0                    53  	MOVX [DPTR],A			Write debug value to latch
+003D  BA 80 02              54  	CJNE R2,#080H,CONT	Check if R2==0x80, set back to 0x0
+0040  7A 00                 55  	MOV R2,#00H			Reset R2
+0042                        56  
+0042                        57  CONT
+0042  08                    58  	INC R0
+DUNFIELD 8051 ASSEMBLER: LAB2                                         PAGE: 2
+
+0043  B8 08 04              59  	CJNE R0,#08H,RELOAD  If R0 != 8, don't toggle. 
+0046                        60  
+0046                        61  * Toggle the LED every 8 ISRs 
+0046                        62  LED
+0046  B2 93                 63  	CPL	P1.3 		Toggle LED Output on P1.3
+0048  78 00                 64  	MOV R0,#0H		Restart ISR counter
+004A                        65  
+004A                        66  * Reload Timer 0 values
+004A                        67  RELOAD
+004A  75 8C 33              68  	MOV TH0,#033H	Reload the timer value 
+004D  75 8A 3D              69  	MOV TL0,#03DH
+0050  D2 8C                 70  	SETB TCON.4    TR0 start timer 0 
+0052                        71  
+0052                        72  
+0052  C2 94                 73  	CLR P1.4        Clear debug pin
+0054  32                    74  	RETI
+0055                        75  

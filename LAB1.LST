@@ -1,0 +1,125 @@
+DUNFIELD 8051 ASSEMBLER: LAB1                                         PAGE: 1
+
+0000                         1  *
+0000                         2  * EMILY Lab 1 Joey Jacobus
+0000                         3  * 
+0000                         4  * This program shall calculate the following equation using integer division: Z = ((X+2)/Y)*4
+0000                         5  * In this assignment, X, Y, and Z are unsigned 8-bit values.
+0000                         6  * Example: If X=0x1C and Y=0x07, then Z=0x10. (28+2 = 30 and 30 div 7 = 4 and 4*4 = 16) 
+0000                         7  *
+0000                         8  * Preconditions:
+0000                         9  *  Accumulator contains the dividend X.
+0000                        10  *  B register contains the divisor Y. 
+0000                        11  * Post Conditions:
+0000                        12  *	Internal data memory (IRAM) location 0x20 contains the value of (X+2)
+0000                        13  * 	IRAM location 0x21 contains the 8-bit quotient of (X+2)/Y (in hexadecimal)
+0000                        14  * 	IRAM location 0x22 contains the 8-bit remainder of (X+2)/Y (in hexadecimal)
+0000                        15  *	IRAM location 0x23 contains the 8-bit result Z (in hexadecimal)
+0000                        16  * 	IRAM location 0x30 contains the error code. 
+0000                        17  * Other requirements:
+0000                        18  *	This program must implement an algorithm that does not use the 8051 divide (DIV) or
+0000                        19  * multiply (MUL) instructions.
+0000                        20  * Use an 8051 shift/rotate instruction to implement the multiplication.
+0000                        21  * The program must start at address 0000h.
+0000                        22  * When the calculation is complete, the program jumps to a label named 'ENDLOOP' and
+0000                        23  * enters an infinite loop.
+0000                        24  * Error handling:
+0000                        25  * If no error occurs during program execution, the program shall write a ‘0x00 into the error
+0000                        26  *	code in internal memory.
+0000                        27  * If the calculation exceeds an 8-bit value when adding, then the program shall write a ‘0x01’
+0000                        28  *	into the error code in internal memory and then immediately jump to ‘ENDLOOP’ without
+0000                        29  *	performing any calculations
+0000                        30  * If the divisor is 0, then the program shall write a ‘0x02’ into the error code in internal
+0000                        31  *	memory and then immediately jump to ‘ENDLOOP’ without performing any calculations.
+0000                        32  * If the calculation exceeds an 8-bit value when multiplying, then the program shall leave the
+0000                        33  *	least significant 8 bits of the result in Z and shall write a ‘0x03’ into the error code in internal
+0000                        34  *	memory
+0000                        35  
+0000                        36  
+0000                        37  	ORG	$0000
+0000                        38  BEGIN	
+0000                        39  	*Check if Y == 0
+0000  A8 F0                 40  	MOV R0,B
+0002  B8 00 02              41  	CJNE R0,#0H,DO_ADD
+0005  01 4C                 42  	AJMP ZERO
+0007                        43  
+0007                        44  DO_ADD
+0007  24 02                 45  	ADD A,#2 			(x+2)
+0009  78 20                 46  	MOV R0,#20H
+000B  F6                    47  	MOV [R0],A 			Store X+2 at 0x20
+000C                        48  
+000C                        49  	* Check for overflow
+000C  50 02                 50  	JNC	DIVIDE		Jump if carry==0
+000E  01 46                 51  	AJMP OVERFLOW   Jump to error
+0010                        52  
+0010                        53  *Divide A / B     A = X+2  B = Y 
+0010                        54  DIVIDE
+0010  78 00                 55  	MOV R0,#0
+0012                        56  DIV_LOOP 
+0012  F9                    57  	MOV R1,A 	*Store possible remainder in R1
+0013  95 F0                 58  	SUBB A,B
+DUNFIELD 8051 ASSEMBLER: LAB1                                         PAGE: 2
+
+0015  08                    59  	INC R0
+0016  60 05                 60  	JZ DIV_EVENLY	
+0018  50 F8                 61  	JNC DIV_LOOP
+001A  18                    62  	DEC R0
+001B  01 1F                 63  	AJMP DIV_DONE
+001D                        64  
+001D                        65  DIV_EVENLY
+001D  79 00                 66  	MOV R1,#0 	*Set remainder to zero if evenly divided
+001F                        67  
+001F                        68  DIV_DONE
+001F  E8                    69  	MOV A,R0
+0020  89 F0                 70  	MOV B,R1
+0022                        71  
+0022                        72  	* Write result of divide and remainder to 0x21 and 0x22 respectively
+0022  78 21                 73  	MOV R0,#21H
+0024  79 22                 74  	MOV R1,#22H
+0026  F6                    75  	MOV [R0],A
+0027  A7 F0                 76  	MOV [R1],B
+0029                        77  
+0029                        78  *Multiply  by 4 and check for overflow
+0029                        79  	
+0029  C3                    80  	CLR C
+002A  33                    81  	RLC A
+002B  50 06                 82  	JNC ROTATE
+002D                        83  
+002D                        84  	*Overflow  occurred on first shift
+002D  78 30                 85  	MOV R0,#30H
+002F  76 03                 86  	MOV [R0],#3H
+0031  01 41                 87  	AJMP RESULT
+0033                        88  ROTATE
+0033  C3                    89  	CLR C
+0034  33                    90  	RLC A
+0035  50 06                 91  	JNC NO_ERROR 
+0037                        92  
+0037                        93  	* Over flow occurred on second shift
+0037  78 30                 94  	MOV R0,#30H
+0039  76 03                 95  	MOV [R0],#3H
+003B  01 41                 96  	AJMP RESULT
+003D                        97  
+003D                        98  NO_ERROR
+003D  78 30                 99  	MOV R0,#30H
+003F  76 00                100  	MOV [R0],#0H
+0041                       101  
+0041                       102  * Put the result in memory 0x23
+0041                       103  RESULT
+0041  78 23                104  	MOV R0,#23H
+0043  F6                   105  	MOV [R0],A
+0044                       106  
+0044  01 50                107  	AJMP ENDLOOP
+0046                       108  
+0046                       109  OVERFLOW
+0046  78 30                110  	MOV R0,#30H
+0048  76 01                111  	MOV [R0],#1H
+004A  01 50                112  	AJMP ENDLOOP
+004C                       113  
+004C                       114  ZERO
+004C                       115  	*ERROR Divide by Zero
+004C  78 30                116  	MOV R0,#30H
+DUNFIELD 8051 ASSEMBLER: LAB1                                         PAGE: 3
+
+004E  76 02                117  	MOV [R0],#2H
+0050                       118  ENDLOOP
+0050  01 50                119  	AJMP ENDLOOP

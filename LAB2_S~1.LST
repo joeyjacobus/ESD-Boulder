@@ -1,0 +1,17 @@
+DUNFIELD 8051 ASSEMBLER: LAB2_S~1                                     PAGE: 1
+
+0000                         1  *
+0000                         2  * Lab 2 simple test program for testing EPROM fetches
+0000                         3  * 
+0000                         4  
+0000                         5  
+0000                         6  	ORG	$0000
+0000                         7  
+0000  01 40                  8  Start AJMP CBIT
+0002                         9  
+0040                        10  	ORG $0040
+0040                        11  CBIT 
+0040  00                    12  	NOP
+0041  B2 93                 13  	CPL P1.3
+0043  00                    14  	NOP
+0044  01 00                 15  	AJMP Start

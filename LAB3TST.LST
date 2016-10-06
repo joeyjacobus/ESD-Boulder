@@ -1,0 +1,47 @@
+DUNFIELD 8051 ASSEMBLER: LAB3TST                                      PAGE: 1
+
+0000                         1  *
+0000                         2  * EMILY Lab 3 Joey Jacobus
+0000                         3  * 
+0000                         4  * Tests output to serial monitor 
+0000                         5  
+0000                         6  	ORG	$0000
+0000  02 00 03               7  	LJMP BEGIN
+0003                         8  
+0003                         9  
+0003                        10  
+0003                        11  BEGIN
+0003                        12  	* Setup interrupts, gpio output, RD as secondary function
+0003                        13  
+0003                        14  	* VAlue = 256 - ((11.0592 * 10^6)/192)/BAUD
+0003  75 8D FD              15  	MOV TH1,#253 		Auto-Reload value for timer 1
+0006  75 8C FD              16  	MOV TH0,#253 		Load value into timer 1
+0009                        17  
+0009  75 89 20              18  	MOV TMOD,#20H    8 bit  auto-reload mode 2
+000C                        19  
+000C  D2 8E                 20  	SETB TCON.6     TR1 start timer 1 
+000E                        21  	* SETB PCON.7		We want to double baud rate. 
+000E                        22  
+000E                        23  
+000E                        24  	* Configure P3.6 and P3.7 as secondary function /WR and /RD
+000E  C2 B6                 25  	CLR P3.6
+0010  D2 B6                 26  	SETB P3.6
+0012                        27  
+0012  C2 B7                 28  	CLR P3.7
+0014  D2 B7                 29  	SETB P3.7
+0016                        30  
+0016                        31  	* Configure Serial port
+0016  75 98 40              32  	MOV SCON,#40H	Mode 1, 8 bit uart with timer 1 baud generator	
+0019                        33  
+0019  79 56                 34  	MOV R1,#056H	puts 'ascii value for U' in R1
+001B  C2 99                 35  	CLR SCON.1		Make sure clear to start
+001D  89 99                 36  	MOV SBUF,R1
+001F                        37  MAINLOOP
+001F  30 99 04              38  	JNB SCON.1,SKIP		Check if TI is set, if not don't transmit
+0022  89 99                 39  	MOV SBUF,R1
+0024  C2 99                 40  	CLR SCON.1	Clear TI bit 
+0026                        41  
+0026                        42  SKIP
+0026  01 1F                 43  	AJMP MAINLOOP
+0028                        44  
+0028                        45  	

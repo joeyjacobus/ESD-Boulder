@@ -1,0 +1,1089 @@
+
+
+
+
+
+
+
+
+
+
+
+
+       ==================================================================
+       MM   MM   OOOO   N     N IIIIIII  CCCC      A     5555555   22222
+       M M M M  O    O  NN    N    I    C    C    A A    5        2     2
+       M  M  M  O    O  N N   N    I    C        A   A   555555         2
+       M     M  O    O  N  N  N    I    C       A     A        5   22222
+       M     M  O    O  N   N N    I    C       AAAAAAA        5  2
+       M     M  O    O  N    NN    I    C    C  A     A  5     5  2
+       M     M   OOOO   N     N IIIIIII  CCCC   A     A   55555   2222222
+       ==================================================================
+
+
+
+
+
+                                       A
+                                   PC Hosted
+                                Monitor for the
+                                 8051 and 8052
+
+
+
+
+
+                                  Release 1.7
+
+                               Revised 07-Apr-00
+
+
+
+
+
+
+
+
+
+
+                          Dunfield Development Systems
+                          ----------------------------
+                             High quality tools for
+                              Embedded Development
+                                 at low prices.
+
+                            http://www.dunfield.com
+
+
+                       Copyright 1991-2005 Dave Dunfield
+                              All rights reserved
+
+
+
+                      MONICA: A PC Hosted 8051/52 Monitor
+
+                               TABLE OF CONTENTS
+
+
+                                                                         Page
+
+     1. INTRODUCTION                                                        1
+
+        1.1 Host System Requirements                                        1
+        1.2 Target System Requirements                                      2
+
+     2. STARTING MONICA                                                     3
+
+
+     3. USING MONICA                                                        4
+
+        3.1 The Main Control Panel                                          4
+        3.2 The Memory Editor                                              12
+        3.3 Messages                                                       14
+
+     4. SINGLE-CHIP EMULATION WITH THE DS5000                              16
+
+        4.1 Loading the kernal                                             16
+        4.2 Starting and configuring MONICA                                17
+        4.3 Using the DS5000TK                                             17
+
+     5. INTERFACE CIRCUITS                                                 18
+
+        5.1 RESET circuits                                                 18
+        5.2 PSEUDO-ROM Circuit                                             20
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 1
+
+
+    1. INTRODUCTION
+
+          MONICA is a PC hosted monitor/debugger for the 8051/52  family  of
+       processors.  It provides a powerful  on-chip  debugging  environment,
+       using a tiny firmware  "kernal"  in the target system,  and a easy to
+       use "windowed"  interface program running on the an IBM PC compatible
+       computer. MONICA offers many features including:
+
+       - Uses no RAM memory from the target system.
+
+       - Supports separate code and data space (requires hardware assist).
+
+       - Single step, Animate and Full Speed execution modes.
+
+       - Simultaneous on-screen displays of  program  disassembly,  internal
+         memory, CPU registers and monitor messages.
+
+       - Full screen editors for CPU registers,  Special Function  Registers
+         (SFR's), and each of the INTERNAL, EXTERNAL DATA and PROGRAM memory
+         spaces.  All of the above may be viewed/altered at any time  during
+         the debugging session.
+
+       - Multiple breakpoints are transparent to the user program.
+
+       - Supports the additional SFR's and internal RAM of the 8052 series.
+
+       - Supports single-chip "in circuit emulation" using a DS5000.
+
+       1.1 Host System Requirements
+
+             MONICA will run on any IBM PC/AT/PS2 compatible system  with  a
+          MDA/CGA/EGA or VGA display,  two COM ports,  and at least  64K  of
+          free system RAM.
+
+          - If the serial I/O redirect feature is not  used,  only  one  COM
+            port is required.
+          - Some CGA displays may exibit "snow" or flicker during high speed
+            screen updates.  This effect will not occur with MDA, EGA or VGA
+            displays.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 2
+
+
+       1.2 Target System Requirements
+
+             MONICA debugs by communicating  with  a  tiny  (less  than  2K)
+          "kernal"  program on the target system.  This kernal is located in
+          memory at address $0000,  which allows  it  to  execute  when  the
+          processor resets, and to gain access to the interrupt vectors. All
+          vectors  except  for  "Timer  1  Overflow"   are   remapped   into
+          corresponding  locations  at  the  beginning  RAM  program  memory
+          (normally $0800).
+
+             Since the kernal occupies program memory from $0000-$07FF,  the
+          user program should be origined  to  begin  at  $0800  or  higher.
+          Interrupt vectors in the user program should be placed at $0800  +
+          the normal vector offset.
+
+             The serial port of the target system must be connected  to  the
+          COM2 serial port of  the  PC  (Unless  the  '/Swapcom'  option  is
+          enabled, in which case COM1 is used).
+
+             MONICA uses the RTS signal on the COM port to perform  a  RESET
+          of the target system.  MONICA will pulse RTS to perform  a  reset.
+          During normal  (non-reset)  operation,  RTS is  maintained  in  an
+          ASSERTED state.
+
+             MONICA lowers the DTR signal whenever PROGRAM memory  is  being
+          written.  For all other operations,  DTR is asserted.  The  target
+          system may use this signal to map a RAM back and forth between the
+          PROGRAM and DATA address spaces.  If this feature is  implemented,
+          you will be able to use MONICA with a full  128K  of  memory  (64K
+          CODE + 64K DATA).
+
+             If the hardware does not support the above  mapping,  then  you
+          must use an 8051/52 I/O pin to  enable  write  access  to  program
+          memory (KERNL52 modification required),  or use a system that maps
+          RAM into BOTH the DATA  and  PROGRAM  address  spaces.  This  dual
+          mapping can be accomplished by ANDing the RD and PSEN  lines  from
+          the CPU.
+
+             The control software uses TIMER1  internally  to  generate  the
+          baud rate clock for its serial port,  and  also  as  an  interrupt
+          source for single-stepping.  This means that TIMER1 should not  be
+          reprogrammed, or have its interrupt disabled by the test software.
+          If your application uses the serial port,  we recommend  that  you
+          also use TIMER1 as the baud rate generator,  and  during  testing,
+          either do not program it,  or make sure to program it at the  same
+          speed as MONICA (default = 28800).
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 3
+
+
+    2. STARTING MONICA
+
+          Insure that the resident control software  (supplied)  is inserted
+       into the target system,  and that the PC running MONICA is  connected
+       to the target systems serial port via COM2.  Power on the test system
+       before starting MONICA.  The resident control software must be active
+       when MONICA "looks" for it.
+
+          MONICA is invoked by typing her name at the DOS command line.  You
+       will be greeted with a "welcome"  screen which displays a reminder of
+       the command line syntax and the copyright message.  This screen  will
+       remain on the display for about 5 seconds.  Pressing  any  key  while
+       this screen is visible will bypass this delay,  and proceed  directly
+       to the main control panel.
+
+          If MONICA is given a file name on the command line,  it is  loaded
+       in the same manner as if the 'L'oad command had been used from within
+       the main control panel.
+
+          MONICA also accepts several option switches on the command line:
+
+            /DS5000       - Allows MONICA to interact with a DS5000 type
+                            processor for in-circuit single-chip emulation.
+
+            /Hardware:nn  - Sets the baud rate for the hardware interface.
+                            Default is 28800.
+
+            /Mono *       - Inhibits the  color display, even  if  a  color
+                            adapter is present. This option may  be  useful
+                            if your monitor/adapter combination provides an
+                            unpleasant or unusable display for MONICA.
+
+            /Reset        - Causes MONICA to ASSERT the RTS line  when  she
+                            attempts to reset the target system, and to de-
+                            assert it at all other times.  This  option may
+                            be  required  when  using  MONICA   with  older
+                            versions of our "BD52" single board computer.
+
+            /Swapcom      - Exchanges the operation of the two serial ports
+                            on the PC.  When this option is used, COM1 will
+                            be used to communicate with the  target system,
+                            and COM2 is used for serial I/O redirection.
+                           *Note: the EMSETUP program can be used establish
+                            alternate COM ports including COM3 and/or COM4.
+
+        * Note: If some of the MONICA windows appear  to  be  an  unreadable
+                washed-out yellow color, try adjusting the color contrast on
+                your monitor. Those windows should be an easy to read brown.
+
+          If MONICA is unable to establish  communication  with  the  target
+       system, you will see an error message flashing on the screen.  MONICA
+       will keep trying,  allowing you to  debug  the  connection.  You  may
+       cancel MONICA,  and return to the DOS prompt by pressing  the  ESCAPE
+       key.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 4
+
+
+    3. USING MONICA
+
+       3.1 The Main Control Panel
+
+             Once MONICA is up and running,  you will be presented with  the
+          "Main Control Panel", which consists of four "windows" displaying:
+
+            - A disassembly of program memory       (Upper LEFT)
+            - The contents of CPU registers         (Upper CENTER)
+            - The contents of INTERNAL MEMORY       (Upper RIGHT)
+            - Informational messages from MONICA    (Lower portion)
+
+             All of MONICA'S functions are accessed  by  command  characters
+          entered from this screen:
+
+          3.1.1 A - Animate execution
+
+                This function begins execution of the user program (from the
+             address in the PC register).  As each instruction is  executed,
+             MONICA will display the instruction  being  executed,  the  CPU
+             registers,  and the contents of internal RAM in the appropriate
+             windows.
+
+                When you enter the 'A'  command,  MONICA will prompt you for
+             the number of instructions to animate. Pressing return (without
+             entering  a  number)  will  cause  the  animation  to   proceed
+             non-stop. Pressing <escape> will return you to the Main Control
+             Panel.
+
+             The animation will terminate when:
+
+                - The requested number of instructions have been stepped.
+                - A HALT breakpoint is encountered.
+                - The <escape> key is pressed on the PC console.
+
+          3.1.2 B - set Breakpoint
+
+                This command sets a breakpoint such that  program  execution
+             under the  'A'nimate,  or  'G'o,  commands will stop  when  the
+             breakpoint address is encountered.
+
+                Up to 10 breakpoints may be in effect at the same time.
+
+                You will be prompted for  the  address  (in  HEX).  Pressing
+             return (without entering an address)  will cause the breakpoint
+             to be  set  at  the  current  program  counter  (PC)  location.
+             Pressing <escape> will return you to the main control panel.
+
+                MONICA stores  the  breakpoint  addresses  internally  in  a
+             simple zero terminated list. This allows her to avoid searching
+             a fixed size  table,  and  helps  speed  up  the  operation  of
+             A)nimation,  especially when there are  few  breakpoints.  This
+             does however cause  the  restriction  that  you  cannot  set  a
+             breakpoint at address zero ($0000).
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 5
+
+
+                NOTE:  Breakpoints are implemented on the target  system  by
+             substituting a LCALL to the breakpoint handler into your  code.
+             This instruction requires THREE bytes of memory.  When  setting
+             breakpoints,  you  must  be  careful  to  place  them  ONLY  at
+             addresses which are the beginning of an instruction,  and  also
+             to insure that any instruction(s) which will be replaced by the
+             remaining two bytes are not the target of a  'jump'  or  'call'
+             instruction.
+
+                After accepting the address,  EMILY will prompt you  with  a
+             menu of flags which control the operation of the breakpoint:
+
+                (E)nable            NO/YES
+                (W)atchpoint        NO/YES
+                (K)eypress          NO/YES
+                (P)ause             NO/YES (delay)
+                (C)ounter           NO/Counter# (current value)
+                (D)ecrement/stop    NO/YES
+
+                The (E)nable flag allows the breakpoint to function. You can
+             clear this flag to temporarily  disable  a  breakpoint  without
+             removing it.
+
+                The  (W)atchpoint flag causes the breakpoint to  update  the
+             EMILY display screens without stopping. This allows you to view
+             the registers or memory  content  at  various  points  in  your
+             program.
+
+                The  (K)eypress flag causes the breakpoint to stop and  wait
+             for a key before proceeding. SPACE will cause the simulation to
+             proceed, and ESCAPE will halt the program.  (W)atchpoint may be
+             used to cause a display update before the key is requested.
+
+                The  (P)ause flag causes the breakpoint to delay the  number
+             of milliseconds specified in the breakpoint delay  timer.  This
+             is most useful with  (W)atchpoint to allow  time  to  view  the
+             displays before the program proceeds.
+
+                The  (C)ounter option allows you  to  select  one  of  three
+             "breakpoint  counters"  which  will  be  incremented  with  the
+             breakpoint is encountered.  The program will proceed after  the
+             counter is updated (Does not stop).
+
+                The  (D)ecrement/stop  option  is  only  available  when   a
+             (C)ounter is selected, and causes the counter to be decremented
+             instead of incremented.  The program will be  halted  when  the
+             counter reaches zero.  This allows you to use a  breakpoint  to
+             stop a loop etc.  after a certain number of iterations.  To  do
+             this enable this option,  and set the counter to the number  of
+             times that you want the breakpoint skipped.
+
+                The Breakpoint Counters and Delay timer can  be  viewed  and
+             changed with the F4 (Breakpoint Counter) function.
+
+                If none of the option  flags  are  set,  a  breakpoint  will
+             simply cause the program to halt.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 6
+
+
+          3.1.3 C - Change register
+
+                You will be prompted for the CPU register to change. Enter a
+             character from the following list, ESCAPE to abort, or F1 for a
+             reminder:
+
+                A   - A accumulator
+                B   - B accumulator
+                D   - Data pointer (DPTR)
+                S   - Stack pointer
+                P   - Program counter
+                W   - processor status Word
+                0-7 - general register 0-7
+
+                After you have selected the register,  you will be  prompted
+             for the new contents (in HEX).
+
+          3.1.4 D - edit Data memory
+
+                This command allows you to edit EXTERNAL DATA  memory  using
+             MONICA's built  in  memory  editor.  See  the  "Memory  Editor"
+             section.
+
+          3.1.5 F - display/edit special Function registers
+
+                The names and contents of all SFR's are displayed in a menu.
+             To change a register,  enter the character preceding  the  ':',
+             immediately to the left of its name.  You will be prompted  for
+             its new contents.
+
+                If multiple columns of SFR's are  defined,  use  <space>  to
+             select the column to edit.
+
+                Pressing any other key while in this menu will  refresh  the
+             display,  and make visible any changes which have  occurred  on
+             the target system I/O lines etc.
+
+          3.1.6 G - Go: execute program
+
+                This  function  begins  high-speed  execution  of  the  user
+             program (from the address in the PC register).
+
+                When you enter the  'G'  command,  MONICA will  ask  if  you
+             really wish to begin execution. Press 'Y' or ENTER to continue,
+             'N' or ESCAPE will return you to the main control panel.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 7
+
+
+                When serial I/O is set to  'Local',  any serial data that is
+             sent by the executing program will be displayed in the  message
+             window in the lower portion of the screen.  Any data  typed  on
+             the keyboard will  be  transmitted  serially  to  the  program.
+             Pressing the ESCAPE key will  bring  up  a  menu  of  execution
+             options:
+
+                Reset target    - Reset and return to main control panel
+                Halt at break   - Stop at next breakpoint regardless of type
+                Send ESCAPE     - Send ESCAPE character to target system
+                Zoom window     - Switch to full screen I/O window
+
+                If serial I/O is being redirected,  serial data sent by  the
+             program is passed on to the PC COM port.  Data received by  the
+             PC is passed through to the target system serial port. Pressing
+             ESCAPE will reset the processor and terminate the 'G'o command.
+             SPACE will cause the program to halt at  the  next  breakpoint,
+             even if it is a type which does not normally halt the program.
+
+                NOTE: When the target is reset,  MONICA retains the contents
+             of processor registers and the first 32 byte of internal memory
+             that  were  in  effect  when  the  original  'G'o  command  was
+             executed.
+
+             Program execution will terminate when:
+
+                - A HALT breakpoint is encountered.
+                - A RESET is performed from the PC console.
+                - The program calls address $001B. *
+
+             * Note:  When the user program returns control  to  the  PC  by
+                      calling address $001B,  MONICA sets the  user  program
+                      counter to the address of the next  instruction  AFTER
+                      that call.  This allow you to use another 'G'o command
+                      to continue execution from that point.
+
+          3.1.7 I - edit Internal memory
+
+                This command  allows  you  to  edit  INTERNAL  memory  using
+             MONICA's built  in  memory  editor.  See  the  "Memory  Editor"
+             section.
+
+          3.1.8 J - Jump to PC
+
+                This command repositions the disassembly display window  (if
+             necessary)  to display the instruction addressed by the current
+             CPU Program Counter (PC).
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 8
+
+
+          3.1.9 K - Kill all breakpoints
+
+                Removes ALL breakpoints after prompting for permission to do
+             so.
+
+          3.1.10 L - Load program image
+
+                Prompts for the name of a file,  and loads it  into  PROGRAM
+             memory.  The file must be  in  either  INTEL  or  MOTOROLA  hex
+             download format.
+
+          3.1.11 N - Next disassembly window
+
+                Advances the disassembler to display the  following  screen.
+             Subsequent  'N'  commands will proceed  to  disassemble  higher
+             memory addresses.
+
+          3.1.12 P - edit Program memory
+
+                This  command  allows  you  to  edit  PROGRAM  memory  using
+             MONICA's built  in  memory  editor.  See  the  "Memory  Editor"
+             section.
+
+          3.1.13 R - Remove a breakpoint
+
+                Prompts for the address,  and if a breakpoint is set at that
+             address,  it is removed.  Pressing return  (without entering an
+             address)  will remove the breakpoint  at  the  current  program
+             counter (PC) location.
+
+          3.1.14 U - scroll disassembler Up
+
+                Backs up the disassembler to display  the  previous  screen.
+             Subsequent  'U'  commands will  proceed  to  disassemble  lower
+             memory addresses.  NOTE:  The  'U'  command makes an attempt to
+             insure that the disassembled code is correct,  however there is
+             a possibility that in backing up,  the disassembler will  align
+             on an incorrect code boundary,  and not be able to  detect  the
+             condition.
+
+          3.1.15 F1 - Help display
+
+                Pressing this key displays a summary of the MONICA  commands
+             which are available from the Main Control Panel.
+
+          3.1.16 F2 - Set Disassembler Address
+
+                Prompts  for  an  address  (in  HEX),  and  repositions  the
+             disassembler window to display instructions beginning  at  that
+             address.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 9
+
+
+          3.1.17 F3 - Setup Serial Port
+
+                Opens a window displaying the (B)audrate,  (P)arity,  (D)ata
+             bits and  (S)top bits which are currently  configured  for  the
+             PC's COM1 serial port.
+
+                Press B, P, D or S to cycle to the next corresponding entry.
+
+                When Baudrate is selected as  'Local',  MONICA will redirect
+             the  programs  serial  accesses  to  the  message  window.  Any
+             characters which are written to SBUF  will  be  output  in  the
+             message window,  and any  character  which  are  typed  at  the
+             keyboard will appear as incomming serial data.  When this  mode
+             is active, Pressing ESCAPE in the 'G'o command brings up a menu
+             of execution options:
+
+                Reset target    - Reset and return to main control panel
+                Halt at break   - Stop at next breakpoint regardless of type
+                Send ESCAPE     - Send ESCAPE character to target system
+                Zoom window     - Switch to full screen I/O window
+
+                If  'Local'  is not selected,  MONICA redirects the programs
+             serial accesses to the PC's  COM1  serial  port,  however,  for
+             maximum  flexibility,  the  actual  data  format  used  may  be
+             configured by this menu.
+
+                Since the speed of the target interface,  and the PC  serial
+             port can be different,  MONICA buffers data in both  directions
+             using two 4K buffers.  Up to 4095 characters can be output in a
+             single burst without data loss.
+
+                MONICA allows you to "fine tune"  a baud rate,  by using the
+             Up/Down keys.  Note that the available  baud  rate  values  are
+             determined by the PC  COM  port  hardware,  and  may  not  fall
+             exactly on the value you wish to use.
+
+                Asynchronous communication is specified to work properly  as
+             long as the device is operating within 5% of the intended  baud
+             rate.
+
+                For example:
+
+                        Desired baud rate       : 1500
+                        Allowable range (+/- 5%): 1425-1575
+                        Closest PC baud rate    : 1496
+
+                In the above example,  the baud rate produced is within 0.3%
+             of  the  desired  value,   and   is   therefore   well   within
+             specifications.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 10
+
+
+          3.1.18 F4 - Breakpoint Counters
+
+                This  function  presents  the  current  breakpoint   counter
+             values, as well as the delay timer. You can edit this list with
+             the cursor keys. Use PgUp to clear the entire field, or PgDn to
+             clear  to  the  end  of  the  field.  A  blank  field  will  be
+             interpreted as ZERO.
+
+          3.1.19 F5 - Reset processor
+
+                This function performs  a  "reset"  of  the  processor.  The
+             target system is reset, and all registers and SFR's are cleared
+             to their default values.  For convenience in debugging code not
+             origined at zero,  the PC register  is  loaded  with  the  base
+             address of the last file loaded.
+
+          3.1.20 F6 - Reset hardware only
+
+                This functions identically to F5  (Reset processor)  command
+             above, except that the contents of A, B, DPTR,  PSW,  SP and PC
+             are preserved.  This may be  useful  in  situations  where  the
+             hardware  "locks"  up,  and you wish to reset it without losing
+             the register contents.
+
+          3.1.21 F7 - Setup DS5000 options
+
+                Sets the memory map when using a DS5000 type processor.  The
+             UP / DOWN keys select the starting address of data memory,  and
+             F2 enables / disables the CE2 select for the second 32K of data
+             memory. See the section on in-circuit emulation with the DS5000
+             for more information.
+
+          3.1.22 F10 - Shell to DOS
+
+                Activating this function suspends the simulator,  clears the
+             screen,  and invokes the operating system prompt.  Entering the
+             'EXIT' command returns to the debugger.
+
+          3.1.23 <space> - Single step one instruction
+
+                Every time you press the  <space>  bar,  MONICA will execute
+             one instruction, and update the on-screen displays.
+
+             NOTE:  Monica performs single-step by re-programming timer-1 to
+             generate an interrupt 1 cycle after the first user  instruction
+             executes. This has several side-effects that the user should be
+             aware of:
+
+             - Monica enables the timer-1 interrupt while stepping over each
+               user instruction by setting bits 7 and 3 in the IE  register.
+               NOTE that this will enable any other interrupts  set  in  IE,
+               even though the user program may "think" that IE.7 = 0, which
+               normally disables all interrupts.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 11
+
+
+             - Stepping over  an  instruction  which  disables  all  or  the
+               timer-1 interrupt will cause the  following  instructions  to
+               run at full speed until the interrupt is re-enabled.
+
+             - Stepping over instructions which modify the interrupt control
+               registers  (IE,  IP etc.)  may  cause  the  interrupt  to  be
+               delayed,  with the  result  that  several  of  the  following
+               instructions may be included in  the  step.  This  gives  the
+               appearance  that  Monica  has  "skipped"  those  instruction,
+               however they have been executed.
+
+          3.1.24 PgDn - Advance IRAM display page
+
+                Advances the internal memory display by one page (64 bytes).
+
+          3.1.25 PgUp - Backup IRAM display page
+
+                Backs up the internal memory display by one page (64 bytes).
+
+          3.1.26 Down - Advance IRAM display line
+
+                Advances the internal memory display by one line (4 bytes).
+
+          3.1.27 Up - Backup IRAM display line
+
+                Backs up the internal memory display by one line (4 bytes).
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 12
+
+
+       3.2 The Memory Editor
+
+             When you activate the 'D',  'I'  or 'P'  commands from the main
+          control panel,  MONICA will invoke its internal "Memory Editor" to
+          access the desired memory area.  When you are within this  editor,
+          the following commands are available:
+
+          3.2.1 F1 - Help display
+
+                Pressing this key displays a summary of the MONICA  commands
+             which are available from within the Memory Editor.
+
+          3.2.2 F2 - Set Edit Address
+
+                Prompts for an address (in HEX),  and repositions the editor
+             display and cursor to edit at that address.
+
+          3.2.3 F3 - Toggle Edit Mode
+
+                MONICA allows two edit modes,  HEX and ASCII.  When  in  HEX
+             mode, your cursor will be positioned in the hexidecimal display
+             portion of the memory  memory  dump,  allowing  you  to  change
+             memory by entering a new value as two  hexidecimal  characters.
+             When in ASCII mode,  your cursor will be  positioned  over  the
+             ASCII portion of the dump,  and you  can  replace  memory  with
+             ASCII text typed at the keyboard.
+
+                Pressing F3 will toggle between HEX and ASCII mode,  causing
+             your cursor to switch between the corresponding portion of  the
+             memory display.
+
+          3.2.4 F4 - Block fill memory
+
+                This  function  prompts  with  "Starting  address",  "Ending
+             address",  and  "Fill  value".  Memory  between  the  specified
+             addresses will be set to the given value.  NOTE:  Block filling
+             is performed via the download function.  Filling large areas of
+             memory may take some time, especially at low serial baud rates.
+
+          3.2.5 F5 - Refresh display from target
+
+                Pressing this key  causes  MONICA  to  refresh  the  display
+             window from the target system.  This is useful  for  monitoring
+             memory mapped I/O locations etc. which may change.
+
+          3.2.6 Up - Move up 1 line
+
+                Pressing the UP ARROW causes the cursor to move  upwards  on
+             the screen by one line. This reduces the memory edit address by
+             16 bytes.
+
+          3.2.7 Down - Move down 1 line
+
+                Pressing the DOWN ARROW causes the cursor to  move  downward
+             on the screen by one  line.  This  increases  the  memory  edit
+             address by 16 bytes.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 13
+
+
+          3.2.8 Left - Move left 1 byte
+
+                Pressing the LEFT ARROW causes the cursor  to  move  to  the
+             left by one byte position. This reduces the memory edit address
+             by 1 byte.
+
+                If the cursor is already at the left hand  margin,  it  will
+             wrap around to the rightmost position of the previous line.
+
+          3.2.9 Right - Move right 1 byte
+
+                Pressing the RIGHT ARROW causes the cursor to  move  to  the
+             right by one byte position.  This in increases the memory  edit
+             address by 1 byte.
+
+                If the cursor is already at the right hand margin,  it  will
+             wrap around to the leftmost position of the following line.
+
+          3.2.10 PgUp - Move back 1 page
+
+                Pressing the PGUP key causes the editor  to  move  back  one
+             display page.  This reduces the  memory  edit  address  by  256
+             bytes.
+
+          3.2.11 PgDn - Move forward 1 page
+
+                Pressing the PGDN causes the  editor  to  move  forward  one
+             display page.  This increases the memory edit  address  by  256
+             bytes.
+
+          3.2.12 Home - Move to start of line
+
+                Pressing the HOME key causes  the  cursor  to  move  to  the
+             leftmost position of the line it is currently on. If the cursor
+             was already in the  leftmost  position,  it  is  moved  to  the
+             leftmost position of the preceding line.
+
+          3.2.13 End - Move to end of line
+
+                Pressing the END key  causes  the  cursor  to  move  to  the
+             rightmost position of the line  it  is  currently  on.  If  the
+             cursor was already in the rightmost position,  it is  moved  to
+             the rightmost position of the following line.
+
+          3.2.14 Ctrl-PgUp - Move to start of memory
+
+                Pressing the CTRL  and  PGUP  keys  repositions  the  editor
+             display and cursor to address $0000 at the start of the  memory
+             block.
+
+          3.2.15 Ctrl-PgDn - Move to end of memory
+
+                Pressing the CTRL  and  PGDN  keys  repositions  the  editor
+             display and cursor to the  highest  address  available  in  the
+             memory block.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 14
+
+
+       3.3 Messages
+
+             During  the  course  of  operation,  MONICA  may  display   the
+          following messages in the message  window  located  in  the  lower
+          portion of the screen:
+
+          3.3.1 All Used!
+
+                You have tried to enter a  breakpoint,  when  all  available
+             breakpoints are in use. MONICA allows up to 10 code breakpoints
+             to be active at any one time.
+
+          3.3.2 Animating at XXXX
+
+                Indicates that MONICA has commenced  animated  execution  of
+             your program, beginning at the address 'XXXX'.
+
+          3.3.3 Conflict!
+
+                Issued to indicate that the address at which you have  tried
+             to set a breakpoint is already active  as  a  breakpoint.  Note
+             that  breakpoints  on  an  8051/52  require  THREE  BYTES,  and
+             therefore this message will result from  attempting  to  set  a
+             breakpoint within three bytes of another one.
+
+                This message will also  result  of  you  attempt  to  set  a
+             breakpoint at address zero ($0000).
+
+          3.3.4 Breakpoints: [XXXX ...]
+
+                This message shows the currently set  breakpoint  addresses,
+             and is issued whenever any  command  involving  breakpoints  is
+             performed.
+
+          3.3.5 Executing at XXXX
+
+                Indicates that MONICA has commenced full speed execution  of
+             your program, beginning at the address 'XXXX'.
+
+          3.3.6 FILENAME: Bad checksum
+
+                MONICA has  encountered  a  record  containing  a  incorrect
+             checksum value while attempting to 'L'oad the named file.
+
+          3.3.7 FILENAME: Invalid HEX record
+
+                MONICA has  encountered  an  improperly  formatted  download
+             record while attempting to 'L'oad the named file.
+
+          3.3.8 FILENAME: N bytes loaded
+
+                The  indicated  number  of  bytes  have  been   successfully
+             'L'oaded from the named file.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 15
+
+
+          3.3.9 FILENAME: Unable to access
+
+                MONICA was unable to open and read the named file.
+
+          3.3.10 Stepping over breakpoint at XXXX
+
+                Indicates that a  'G'  command would start execution  within
+             three  bytes  of  a  breakpoint.  This  prevents  MONICA   from
+             implanting the breakpoint before  executing  the  code.  MONICA
+             single-steps the processor until the program  counter  is  more
+             than three bytes from any breakpoint, and then proceeds.
+
+          3.3.11 Stopped at XXXX
+
+                Indicates that MONICA has stopped execution of  you  program
+             at the indicated address.  This  message  is  appended  to  the
+             initial message indicating that execution had commenced.
+
+          3.3.12 Target system is not responding!!!
+
+                Indicates that MONICA cannot  establish  communication  with
+             the target system.  MONICA will keep trying,  allowing  you  to
+             attempt to debug the  connection.  You  may  cancel  MONICA  by
+             pressing the ESCAPE key.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 16
+
+
+    4. SINGLE-CHIP EMULATION WITH THE DS5000
+
+          Since MONICA downloads the program code and actually  runs  it  on
+       the target system processor,  you must have RAM from  which  you  can
+       execute.  On the standard 8051 family processors, this means that you
+       must have external RAM.  This also means that you have to give up  18
+       of the 32 available I/O lines to  interface  to  that  memory.  Often
+       additional I/O  lines  are  used  for  serial  interface,  timer  and
+       interrupt inputs etc.
+
+          Although many designs can make do with the 8 or 10  remaining  I/O
+       lines,  often a particular project requires the additional I/O  lines
+       which are available in single chip  (no external memory)  mode.  This
+       presents a debugging problem.
+
+          MONICA solves the single-chip debugging problem  by  providing  an
+       interface  to  the  DS5000   series   of   processors   from   Dallas
+       Semiconductor. The DS5000 contains 8, 32 or 64K of internal RAM which
+       can be allocated to the CODE and/or DATA address  spaces.  Since  the
+       memory is internal to the chip,  all of the pins remain available for
+       use as I/O lines.
+
+          For most single-chip applications,  all you have to do is  replace
+       the standard CPU with a DS5000 before running MONICA.
+
+       4.1 Loading the kernal
+
+             Before you can  use  the  DS5000  processor  as  a  single-chip
+          in-circuit emulator with MONICA, you must load the kernal into it.
+          To do this, perform the following steps:
+
+          1)  Assemble the kernal and generate an intel format hex  download
+             file. If you are using our ASM51, the command is:
+                                ASM51 kernal -ti
+
+          2)  With the DS5000 installed in a  system,  and  connected  to  a
+             serial port of the PC.  Ground the PSEN pin (29),  and power up
+             or reset the DS5000.
+
+          3)  Run a terminal program on the PC,  and hit ENTER a  few  times
+             until you see the DS5000 loader prompt. If you have difficulty,
+             see the DS5000 data sheets for information on  acceptable  baud
+             rates for various crystal frequencies.
+
+          4) Enter 'U' to unlock the RAM
+
+          5) Enter 'L' to load code,  and then transmit the KERNL52.HEX file
+             using a simple ASCII send.
+
+          6) Enter 'W 18' to set the data address.
+
+          7)  Release the ground on PSEN,  and reset the DS5000.  The kernal
+             should now be loaded.  Since the internal memory of the  DS5000
+             is non-volitile,  you should not have to repeat this  procedure
+             unless the kernal code should somehow become corrupted. If ever
+             the DS5000 appears to stop working with MONICA,  try  reloading
+             the kernal.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 17
+
+
+       4.2 Starting and configuring MONICA
+
+             When MONICA is started with the  '/DS5000'  option,  additional
+          interfacing to the DS5000 chip is performed  (through the  kernal)
+          to accommodate loading and executing code from the  internal  RAM.
+          This option also enables the F7 (Setup DS5000 options) menu.
+
+             The first item in the DS5000 menu is the  "data address".  This
+          is the memory address above which is assumed to be DATA space, and
+          below which is treated as CODE space.  Memory contents  below  the
+          "data address"  can not be written,  and can be read only with the
+          'MOVC' instruction.  Memory at or above the "data address"  can be
+          read or written with  'MOVX',  but cannot be executed or read with
+          'MOVC'. You should set this value to provide the proper allocation
+          of code and data memory to suit the program under test.  You  must
+          also make sure that the programs memory setup is  consistent  with
+          this setting.
+
+             MONICA will not allow you to set the  "data address"  below the
+          2K mark, to insure that the kernal code cannot be overwritten (The
+          DS5000 would also crash if this were done, since there would be no
+          executable code space).  The  "data address"  is set to $0800 when
+          loading a program,  so that the  RAM  can  be  written.  Once  the
+          program is loaded,  the  "data  address"  is  set  the  the  value
+          programmed in the F7 setup menu.
+
+             The second item on the DS5000 menu is "Toggle CE2 On/Off". This
+          function  (when enabled)  permits the DS5000 to access the  second
+          32K of internal data memory.  Unless you have a 64K  device,  this
+          bit should be left disabled.
+
+       4.3 Using the DS5000TK
+
+             If you would like to use MONICA with  the  DS5000TK  (a  DS5000
+          based in circuit evaluation kit offered by DALLAS),  you  must  do
+          the following:
+
+          - Make sure that the DS5000TK has a suitable crystal connected  to
+            pins 18+19,  that pin 31 (-EA) is tied HIGH,  and that the "A/B"
+            switch for the serial cable is in the "B" position.
+
+          - Load the kernal as described above.  Using the  original  Dallas
+            cable,  DTR must be asserted  to  communicate  with  the  DS5000
+            loader. (or use the KIT5K software supplied with the DS5000TK).
+
+          - Make a special cable with RTS from the PC connected  to  DTR  of
+            the DS5000TK serial DB-25 connector.
+
+          - Use EMSETUP to set the  "RESET logic level"  to  "RESET when RTS
+            asserted".
+
+          DDS offers an application note on using the DS5000TK with EMILY52.
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 18
+
+
+    5. INTERFACE CIRCUITS
+
+       5.1 RESET circuits
+
+             Most low cost 8051/52 boards use a simple reset circuit similar
+          to the one from the INTEL application notes.  This circuit may not
+          provide a  "bulletproof"  reset after very short power outages and
+          brownouts,  however it is very easy  to  implement,  and  entirely
+          adaquate for most applications.
+
+             A reset when RTS is deasserted can be  added  to  this  circuit
+          with an RS-232 receiver (7489, 75150, MAX232, 233 etc.),  a diode,
+          and a resistor:
+
+                         +5V
+                          |  +|| 5uf
+        RS-232 Receiver   +---||-----+------------ RESET (to CPU)
+          (inverting)         ||     |
+               [\     +\ |           |    10K
+         RTS --[ >O---| >|--/\/\/\/--+--/\/\/\/-- Ground (0 volts)
+               [/     +/ |  300 Ohm
+                     1N4148
+
+             Since common RS-232 receiver IC's have two or more receivers in
+          each package,  single board computers using such an IC may have  a
+          spare receiver available.
+
+             WARNING! When RTS controlled RESET is  activated,  the  charged
+          capacitor will try and "push up" the +5V rail (briefly).  For this
+          reason, the capacitor should be as small as possible. For CMOS and
+          other low power systems in which the +5V rail may not  be  capable
+          of absorbing this power,  this  circuit  is  unsuitable,  and  you
+          should substitute the circuit below.
+
+             The following circuit can be used to implement a reset when RTS
+          is deasserted,  and a more reliable  power-up  reset  (if  RTS  is
+          unconnected). It does not require an RS-232 receiver:
+
+                            +---------------+------+--- +5V
+                            |        5K     |      |
+                            |   +--/\/\/\/--+      |
+                            |   |   8.2K       ||+ |
+                            |   +--/\/\/\/--+--||--+
+                     10K    |   |  HP2835   |  || 10uf
+                +--/\/\/\/--+   |   +\ |    |
+                |               +---| >|----+---------- RESET (to CPU)
+                |               |   +/ |    |
+                |  +\ |    | /--+         -----
+          RTS --+--| >|----|< 2N3904       /^\ IN4148
+                   +/ |    | \>-+         +---+
+                  1N4148        |           |
+                                +-----------+---------- Ground (0 volts)
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 19
+
+
+             The following circuit can be used to implement a reset when RTS
+          is asserted  ('/Reset' option enabled),  and a power-up reset  (if
+          RTS is unconnected). It does not require an RS-232 receiver:
+
+
+                                +-----------+------------- +5 Volts DC
+                                |           |
+                            +---+----+      |+
+          RTS ---/\/\/\/\---| 2N9606 |    ----- 10uf, 16v
+                   20K      +---+----+    -----
+                                |           |
+                                +-----------+
+                                            +-------+----- Reset (to CPU)
+                                            |       |
+                                            /     --+--
+                                       8.2K \      /^\
+                                            /     +---+ 1N4148
+                                            |       |
+                                            +-------+----- Ground (0 Volts)
+    MONICA: A PC Hosted 8051/52 Monitor                              Page: 20
+
+
+       5.2 PSEUDO-ROM Circuit
+
+          The  following  decoding  circuit  can  be  used  to  implement  a
+          debugging environment with 2K  DEBUG  ROM,  up  to  62K  CODE  RAM
+          (Pseudo-ROM), and 64K DATA RAM,  using the DTR line from the PC to
+          switch between download and run modes:
+
+        PSEN- -----------------------------+-------- DEBUG ROM OE-
+                                           |
+          A15 -[\                          +-------- CODE RAM OE-
+               [ )--+
+          A14 -[/   |  74LS32 x 4
+                    +-[\
+          A13 -[\     [ )--+
+               [ )----[/   |       +---------------- DEBUG ROM SELECT-
+          A12 -[/          +-[\    |  
+                             [ )---+--[>O----------- CODE RAM SELECT-
+          A11 ---------------[/      74LS04
+
+                                0v (Gnd) ----------- DATA RAM SELECT-
+             RS-232 Receiver
+               (inverting)
+          DTR ---[>O-+------[\
+                     |      [ )--------------------- DATA RAM WR-
+                     |   +--[/
+          WR- -----------+    74LS32 x 2
+                     |   +--[\
+                     |      [ )--------------------- CODE RAM WR-
+              74LS04 +-[>O--[/
+
+          RD- -------------------------------------- DATA RAM OE-
+
+        Note: Selects are for 64K devices, additional decoding with A15,
+              A14, A13 etc. will be required for smaller devices.
+
+          DEBUG ROM SELECT is activated (0)  only when A11-A15 are 0,  which
+          occurs when  the  CPU  accesses  the  lower  2K  of  memory.  When
+          accessing above 2K,  A11-A15 will have at least  1  non-zero  bit,
+          which causes the CODE RAM SELECT to be activated.  The PSEN  input
+          on the ROM/RAM OE pins insures that they  will  be  accessed  only
+          during code fetches.
+
+          When DTR is asserted (HIGH),  the output of the RS-232 receiver is
+          0,  which allows WR- to pass through the OR gate to DATA RAM  WR-.
+          CODE RAM WR- is held high  (OFF)  by the inverted receiver output.
+          When DTR is de-asserted  (LOW),  the output of the RS-232 receiver
+          is high, and holds DATA RAM WR- high (OFF). WR- is allowed to pass
+          through the other OR gate to CODE RAM WR-.
+S/N: DEMO installed August 24, 2016 (Not to be used after 30 days).
